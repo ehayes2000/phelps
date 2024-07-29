@@ -1,0 +1,54 @@
+#include <iostream>
+#include "sfmlFluid.hpp"
+#define SCALE 4
+
+void SfmlFluid::startRenderLoop(){
+    win.setFramerateLimit(60);
+    sf::Image image;
+    image.create(WIN_SIZE, WIN_SIZE, sf::Color::Black);
+    sf::Texture texture;
+    sf::Sprite sprite;
+
+    while (win.isOpen()) {
+        sf::Event event;
+        while (win.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                win.close();
+        }
+        // Update fluid
+        int cx = static_cast<int>((0.5f * WIN_SIZE) / SCALE);
+        int cy = static_cast<int>((0.5f * WIN_SIZE ) / SCALE);
+        
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                fluid.addDensity(cx + i, cy + j, rand() % 101 + 50); // random(50, 150)
+            }
+        }
+
+        static float t = 0;
+        for (int i = 0; i < 2; i++) {
+            float angle = std::sin(t) * 2 * M_PI * 2; // Using sin instead of noise
+            float vx = std::cos(angle) * 0.2f;
+            float vy = std::sin(angle) * 0.2f;
+            t += 0.01f;
+            fluid.addVelocity(cx, cy, vx, vy);
+        }
+        fluid.step();
+        // Render fluid
+        for (int i = 0; i < WIN_SIZE; i++) {
+            for (int j = 0; j < WIN_SIZE; j++) {
+                int x = i / SCALE;
+                int y = j / SCALE;
+                float d = fluid.density[x + y * WIN_SIZE];
+                image.setPixel(i, j, sf::Color(d, d, d));
+            }
+        }
+
+        texture.loadFromImage(image);
+        sprite.setTexture(texture);
+
+        win.clear();
+        win.draw(sprite);
+        win.display();
+    }
+}
