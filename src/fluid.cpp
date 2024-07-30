@@ -83,24 +83,6 @@ void Fluid::diffuse(int b, float *x, float *x0, float diff, float dt, int iter)
     this->linSolve(b, x, x0, a, 1 + 6 * a, iter);
 }
 
-void Fluid::setBnd(int b, float *x)
-{
-    for (int i = 1; i < this->size - 1; i++)
-    {
-        x[this->idx2d(i, 0)] = b == 2 ? -x[this->idx2d(i, 1)] : x[this->idx2d(i, 1)];
-        x[this->idx2d(i, this->size - 1)] = b == 2 ? -x[this->idx2d(i, this->size - 2)] : x[this->idx2d(i, this->size - 2)];
-    }
-    for (int j = 1; j < this->size - 1; j++)
-    {
-        x[this->idx2d(0, j)] = b == 1 ? -x[this->idx2d(1, j)] : x[this->idx2d(1, j)];
-        x[this->idx2d(this->size - 1, j)] = b == 1 ? -x[this->idx2d(this->size - 2, j)] : x[this->idx2d(this->size - 2, j)];
-    }
-    x[this->idx2d(0, 0)] = 0.5f * (x[this->idx2d(1, 0)] + x[this->idx2d(0, 1)]);
-    x[this->idx2d(0, this->size - 1)] = 0.5f * (x[this->idx2d(1, this->size - 1)] + x[this->idx2d(this->size - 2, 0)]);
-    x[this->idx2d(this->size - 1, 0)] = 0.5f * (x[this->idx2d(this->size - 2, 0)] + x[this->idx2d(this->size - 1, 0)]);
-    x[this->idx2d(this->size, this->size - 1)] = 0.5f * (x[this->idx2d(this->size - 2, this->size - 1)] + x[this->idx2d(this->size - 1, this->size - 2)]);
-}
-
 void Fluid::linSolve(int b, float *x, float *x0, float a, float c, int iter)
 {
     float cRecip = 1.0 / c;
@@ -120,7 +102,6 @@ void Fluid::linSolve(int b, float *x, float *x0, float a, float c, int iter)
                     cRecip;
             }
         }
-        this->setBnd(b, x);
     }
 }
 
@@ -135,8 +116,6 @@ void Fluid::project(float *velocX, float *velocY, float *p, float *div, int iter
             p[this->idx2d(i, j)] = 0;
         }
     }
-    this->setBnd(0, div);
-    this->setBnd(0, p);
     this->linSolve(0, p, div, 1, 6, iter);
 
     for (int j = 1; j < this->size - 1; j++)
@@ -147,8 +126,6 @@ void Fluid::project(float *velocX, float *velocY, float *p, float *div, int iter
             velocY[this->idx2d(i, j)] -= 0.5f * (p[this->idx2d(i, j + 1)] - p[this->idx2d(i, j - 1)]) * this->size;
         }
     }
-    this->setBnd(1, velocX);
-    this->setBnd(2, velocY);
 }
 
 void Fluid::advect(int b, float *d, float *d0, float *velocX, float *velocY, float dt)
@@ -202,5 +179,4 @@ void Fluid::advect(int b, float *d, float *d0, float *velocX, float *velocY, flo
                 s1 * (t0 * d0[this->idx2d(i1i, j0i)] + t1 * d0[this->idx2d(i1i, j1i)]);
         }
     }
-    this->setBnd(b, d);
 }

@@ -50,6 +50,5 @@ private:
   void diffuse(int b, float *x, float *x0, float diff, float dt, int iter);
   void project(float *velocX, float *velocY, float *p, float *div, int iter);
   void advect(int b, float *d, float *d0,  float *velocX, float *velocY, float dt);
-  void setBnd(int b, float *x);
   void linSolve(int b, float *x, float *x0, float a, float c, int iter); 
 };
