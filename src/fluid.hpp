@@ -28,6 +28,7 @@ private:
   float width;
   float height;
   void initializeParticles();
+  void gridInit(int cols, int n, float gap);
 public:
   std::vector<Particle> particles;
   Fluid(float width, float height, int nParticles): 
@@ -35,7 +36,7 @@ public:
     width(width), 
     height(height)
   {
-    this->initializeParticles();
+    gridInit(10, 60, 5);
   }
   void step(float deltaTime);
 };

@@ -1,9 +1,8 @@
 #include "sfmlFluid.hpp"
-#include <iostream>
 
 
 sf::CircleShape *SfmlFluid::makeDrawable(const Particle &p){
-  sf::CircleShape *c = new sf::CircleShape(5);
+  sf::CircleShape *c = new sf::CircleShape(PARTICLE_RADIUS);
   Point rCords = stor(p.pos);
   c->setPosition(rCords.x, rCords.y);
   c->setFillColor(sf::Color::Blue);
@@ -46,7 +45,6 @@ void SfmlFluid::startRenderLoop() {
                 window.close();
             }
         }
-
         // Clear the window with black color
         deltaTime = clock.restart().asSeconds();
         fluid.step(deltaTime);
