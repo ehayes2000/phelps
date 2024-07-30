@@ -9,3 +9,4 @@ bin/
 lib/
 CPackConfig.cmake
 CPackSourceConfig.cmake
+phelps
