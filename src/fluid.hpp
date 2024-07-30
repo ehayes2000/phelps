@@ -6,15 +6,17 @@
 
 class Point { 
 public:
-  float  x;
+  float x;
   float y;
-  Point (float x, float y):x(x), y(y){}
+  Point(): x(0), y(0){}
+  Point(float x, float y):x(x), y(y){}
 };
 
 class Particle { 
 public:
   Point pos;
   Point vel;
+  Particle(): pos(-1, -1), vel(0, 0){}
   Particle(float x, float y, float vx, float vy): 
     pos(x, y),
     vel(vx, vy)
