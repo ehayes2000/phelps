@@ -2,8 +2,8 @@
 
 
 sf::CircleShape *SfmlFluid::makeDrawable(const Particle &p){
-  sf::CircleShape *c = new sf::CircleShape(PARTICLE_RADIUS);
-  Point rCords = stor(p.pos);
+  sf::CircleShape *c = new sf::CircleShape(fluid.radius * scale);
+  Vec rCords = stor(p.pos);
   c->setPosition(rCords.x, rCords.y);
   c->setFillColor(sf::Color::Blue);
   return c;
@@ -11,16 +11,16 @@ sf::CircleShape *SfmlFluid::makeDrawable(const Particle &p){
 
 std::vector<sf::CircleShape*> &SfmlFluid::makeDrawables(){ 
   this->drawables.clear();
-  this->drawables.reserve(this->fluid.particles.size());
-  for (const auto &i: fluid.particles){
+  this->drawables.reserve(this->fluid.getParticles().size());
+  for (const auto &i: fluid.getParticles()){
     drawables.push_back(makeDrawable(i));
   }
   return drawables;
 }
 
 void SfmlFluid::updateDrawables() { 
-  for (int i = 0; i < fluid.particles.size(); i ++){
-    Point rCords = stor(fluid.particles[i].pos);
+  for (int i = 0; i < fluid.getParticles().size(); i ++){
+    Vec rCords = stor(fluid.getParticles()[i].pos);
     drawables[i]->setPosition(
       rCords.x,
       rCords.y
@@ -61,9 +61,17 @@ void SfmlFluid::startRenderLoop() {
     }
 }
 
-Point SfmlFluid::stor(const Point &p){
-  return Point(
-    p.x * scale,
-    winHeight - (p.y * scale)
+Vec SfmlFluid::stor(const Vec &p){
+  /*
+    Transorm simulation points to render points. 
+    Flip y axis
+    offset by radius
+    // p.x * scale,
+    // winHeight - (p.y * scale)
+  */
+  return Vec(
+    scale * (p.x - fluid.radius),
+    scale * (fluid.boundSize.y- p.y - fluid.radius)
   );
+
 }
