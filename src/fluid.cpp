@@ -106,9 +106,7 @@ const Vec Fluid::computePressureForce(const Vec& p){
       float slope = smoothingKernelDerivative(params.smoothingRadius, dst);
       float density = densities[i];
       pressure += -densityToPressure(density) * dir * slope / density;
-      // std::cout << -densityToPressure(density) << " * " << dir << " * " << slope << " / " << density << std::endl;
   }
-  // std::cout << "pressure: " << pressure << std::endl;
   return pressure;
 }
 

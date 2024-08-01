@@ -3,6 +3,7 @@
 #include <vector> 
 #include <ostream>
 #include <iostream>
+#include "vec.hpp"
 
 #define GRAVITY 32.174f
 #define PGAP 5
@@ -11,62 +12,15 @@
 class FluidParameters { 
 public: 
   const float collisionDamping = .9f;
-  const float smoothingRadius = 1000.f;
+  const float smoothingRadius = .05f;
   const float particleMass = 1.f;
   const bool isGravity = false;
   const float targetDensity = 2.75f;
-  const float pressureMultiplier = 1;
+  const float pressureMultiplier = .015;
   const float smoothingVolume = M_PI * std::pow(smoothingRadius, 8) / 4;
   FluidParameters() = default;
 };
 
-class Vec { 
-public:
-  float x;
-  float y;
-  Vec(): x(0), y(0){}
-  Vec(float x, float y):x(x), y(y){}
-  Vec operator/(const float& s) const { 
-    return Vec( 
-      x / s,
-      y / s
-    );
-  }
-  Vec operator-(const Vec& rhs) const {
-    return Vec(
-      x - rhs.x,
-      y - rhs.y
-    );
-  }
-  Vec operator*(const float &s) const {
-    return Vec(
-      x * s,
-      y * s
-    );
-  }
-  friend Vec operator*(const float &s, const Vec& v) { 
-    return Vec(
-      v.x *s,
-      v.y *s
-    );
-  }
-
-  Vec& operator+=(const Vec &v){ 
-    x += v.x;
-    y += v.y;
-    return *this;
-  }
-
-  friend std::ostream& operator<<(std::ostream& os, const Vec& v){
-    os << "<" << v.x << ", " << v.y << ">";
-    return os;
-  }
-  float mag(){
-    return std::sqrt(
-      std::pow(x, 2) + std::pow(y, 2)
-    );
-  }
-};
 
 class Particle { 
 public:

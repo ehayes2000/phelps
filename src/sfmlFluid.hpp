@@ -19,8 +19,12 @@ public:
   SfmlFluid(int width, int height): 
     winWidth(width),
     winHeight(height),
-    scale(static_cast<float>(height)/100.f),
-    fluid(150, 100, N_PARTICLES, 1)
+    scale(SfmlFluid::computeScale(Vec(width, height))),
+    fluid(static_cast<float>(width) / computeScale(Vec(width, height)), 
+          static_cast<float>(height) / computeScale(Vec(width, height)), 
+          N_PARTICLES, 
+          .01
+    )
   {
     makeDrawables();
   }
@@ -29,4 +33,5 @@ public:
       delete p;
   }
   void startRenderLoop();
+  static float computeScale(const Vec &s) {return std::max(s.x, s.y);}
 };
