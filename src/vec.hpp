@@ -57,6 +57,12 @@ public:
     return *this;
   }
 
+  Vec& operator/=(const float& v){ 
+    x /= v;
+    y /= v;
+    return *this;
+  }
+
   friend std::ostream& operator<<(std::ostream& os, const Vec& v){
     os << "<" << v.x << ", " << v.y << ">";
     return os;

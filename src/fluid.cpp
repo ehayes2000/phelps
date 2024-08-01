@@ -4,21 +4,19 @@ void Fluid::step(float deltaTime){
   Vec gravity(0, deltaTime * GRAVITY);
   computeAllDensities();
   for (int i = 0; i < particles.size(); i ++){
+    particles[i].vel += particles[i].force * deltaTime;
     particles[i].pos += particles[i].vel * deltaTime;
-    Vec pressureForce = computePressureForce(particles[i].pos);
-    Vec acceleration = pressureForce / densities[i];
-    // std::cout << "pressure: " << pressureForce << ", acceleration: " << acceleration << std::endl;
-    particles[i].vel = acceleration * deltaTime;
+    particles[i].force = Vec(0,0);
+    // particles[i].force += 
+    Vec pressure = computePressureForce(particles[i].pos);
+    pressure /= densities[i] != 0.f ? densities[i] : 1.f;
+    particles[i].force += pressure;
+    boundryCollision(particles[i]);
     if (params.isGravity){
       particles[i].vel -= gravity;
     }
-    boundryCollision(particles[i]);
   }
-  // for (int i = 0; i < particles.size(); i++){
-  //   for (int j = 0; j < particles.size(); j++){ 
-  //     collide(particles[i], particles[j]);
-  //   }
-  // }
+  std::cout << computeAvgDensity() << std::endl;
 }
 
 void Fluid::gridInit(int cols, int n, float gap){
@@ -34,14 +32,6 @@ void Fluid::gridInit(int cols, int n, float gap){
       particles[created] = Particle(x, y, 0, 0);
     }
     x = xStart;
-  }
-}
-
-void Fluid::collide(Particle &a, const Particle &b){
-  Vec overlap = a.pos - b.pos;
-  if (overlap.mag() <= radius){
-    a.vel = b.vel;
-    a.pos += overlap;
   }
 }
 
@@ -133,8 +123,9 @@ void Fluid::applyForce(Vec &p, float force, float radius){
     float dist = offset.mag();
     if (dist < radius){
       float influence = smoothingKernel(radius, dist);
-      Vec force = (offset / dist) * influence * params.pressureMultiplier;
-      particle.vel += force;
+      Vec force = (offset / dist) * influence; 
+      particle.force += force;
+      
     }
   }
 }

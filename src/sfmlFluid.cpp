@@ -61,7 +61,7 @@ void SfmlFluid::startRenderLoop()
       {
         isLClick = true;
         Vec simPoint = rtos(Vec(event.mouseButton.x, event.mouseButton.y));
-        fluid.applyForce(simPoint, 0.002f, 0.2f);
+        fluid.applyForce(simPoint, 1000.f, 0.2f);
       }
       else if (event.type == sf::Event::MouseButtonReleased)
       {
@@ -71,7 +71,7 @@ void SfmlFluid::startRenderLoop()
       {
         sf::Vector2i mPos = sf::Mouse::getPosition(window);
         Vec simPoint = rtos(Vec(mPos.x, mPos.y));
-        fluid.applyForce(simPoint, 0.01f, 0.2f);
+        fluid.applyForce(simPoint, 10.f, 0.2f);
       }
     }
     if (isPaused)

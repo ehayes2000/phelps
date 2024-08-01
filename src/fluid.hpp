@@ -1,4 +1,5 @@
 #pragma once
+#include <numeric>
 #include <cmath>
 #include <vector> 
 #include <ostream>
@@ -12,11 +13,11 @@
 class FluidParameters { 
 public: 
   const float collisionDamping = .7f;
-  const float smoothingRadius = .08f;
-  const float particleMass = 1.f;
+  const float smoothingRadius = .1f;
+  const float particleMass = .01f;
   const bool isGravity = false;
-  const float targetDensity = 1.f;
-  const float pressureMultiplier = .2f;
+  const float targetDensity = 6.f;
+  const float pressureMultiplier = .0005f;
   const float smoothingVolume = M_PI * std::pow(smoothingRadius, 8) / 4;
   FluidParameters() = default;
 };
@@ -26,6 +27,7 @@ class Particle {
 public:
   Vec pos;
   Vec vel;
+  Vec force;
   Particle(): pos(-1, -1), vel(0, 0){}
   Particle(float x, float y, float vx, float vy): 
     pos(x, y),
@@ -74,4 +76,8 @@ public:
   const std::vector<Vec>& getPressures() const { return pressures; }
   void step(float deltaTime);
   void applyForce(Vec &p, float force, float radius);
+  float computeAvgDensity(){
+    float density = std::accumulate(densities.begin(), densities.end(), 0);
+    return density / static_cast<float>(densities.size());
+  }
 };
