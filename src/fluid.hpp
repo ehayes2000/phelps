@@ -5,18 +5,18 @@
 #include <iostream>
 #include "vec.hpp"
 
-#define GRAVITY 32.174f
+#define GRAVITY 32.f
 #define PGAP 5
 #define PCOLS 20
 
 class FluidParameters { 
 public: 
-  const float collisionDamping = .9f;
-  const float smoothingRadius = .05f;
+  const float collisionDamping = .7f;
+  const float smoothingRadius = .08f;
   const float particleMass = 1.f;
   const bool isGravity = false;
-  const float targetDensity = 2.75f;
-  const float pressureMultiplier = .015;
+  const float targetDensity = 1.f;
+  const float pressureMultiplier = .2f;
   const float smoothingVolume = M_PI * std::pow(smoothingRadius, 8) / 4;
   FluidParameters() = default;
 };
@@ -53,6 +53,8 @@ private:
   float smoothingKernelDerivative(const float &radius, const float &dst) const;
   float densityToPressure(const float &density) const ;
   const Vec computePressureForce(const Vec&);
+  void computeAllDensities();
+  float computeDensity(const Vec &p) const;
 public:
   const Vec boundSize;
   const float radius;
@@ -67,11 +69,9 @@ public:
     randomInit(nParticles);
     // gridInit(PCOLS, nParticles, PGAP);
   }
-  const std::vector<Particle>& getParticles() const { 
-    return particles;
-  }
+  const std::vector<Particle>& getParticles() const { return particles; }
+  const std::vector<float>& getDensities() const { return densities; }
+  const std::vector<Vec>& getPressures() const { return pressures; }
   void step(float deltaTime);
-  float computeDensity(const Vec &p) const;
-  const std::vector<float>& computeAllDensities();
-  // const std::vector<Vec>& computeDensityGradient();
+  void applyForce(Vec &p, float force, float radius);
 };

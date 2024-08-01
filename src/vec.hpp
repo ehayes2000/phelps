@@ -8,6 +8,12 @@ public:
   float y;
   Vec(): x(0), y(0){}
   Vec(float x, float y):x(x), y(y){}
+  
+  Vec& operator=(const Vec& v) { 
+    x = v.x;
+    y = v.y;
+    return *this;
+  }
   Vec operator/(const float& s) const { 
     return Vec( 
       x / s,
@@ -18,6 +24,12 @@ public:
     return Vec(
       x - rhs.x,
       y - rhs.y
+    );
+  }
+  Vec operator+(const Vec& rhs) const { 
+    return Vec (
+      x + rhs.x,
+      y + rhs.y
     );
   }
   Vec operator*(const float &s) const {
@@ -36,6 +48,12 @@ public:
   Vec& operator+=(const Vec &v){ 
     x += v.x;
     y += v.y;
+    return *this;
+  }
+
+  Vec& operator-=(const Vec &v) { 
+    x -= v.x;
+    y -= v.y;
     return *this;
   }
 

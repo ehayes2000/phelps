@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "fluid.hpp"
 
-#define N_PARTICLES 300
+#define N_PARTICLES 400
 
 class SfmlFluid { 
 private:
@@ -10,7 +10,8 @@ private:
   std::vector<sf::CircleShape*> drawables;
   std::vector<sf::CircleShape*> &makeDrawables();
   sf::CircleShape* makeDrawable(const Particle &p);
-  Vec stor(const Vec &p);
+  Vec stor(const Vec &p) const;
+  Vec rtos(const Vec &p) const;
   void updateDrawables();
   int winHeight;
   int winWidth;
@@ -23,7 +24,7 @@ public:
     fluid(static_cast<float>(width) / computeScale(Vec(width, height)), 
           static_cast<float>(height) / computeScale(Vec(width, height)), 
           N_PARTICLES, 
-          .01
+          .005
     )
   {
     makeDrawables();
