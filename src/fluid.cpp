@@ -1,6 +1,8 @@
 #include "fluid.hpp"
 
 void Fluid::step(float deltaTime){
+  if (deltaTime <= 0.f)
+    return;
   if (params.isGravity){
     for (auto &p: particles){
       p.velocity += Vec(0.f, -deltaTime * GRAVITY);
@@ -24,6 +26,27 @@ float kernel(const float dist, const float radius) {
   return std::pow(1 - dist / radius, 2);
 }
 
+float nearKernel(const float dist, const float radius){
+  if (dist > radius)
+    return 0.f;
+  return std::pow(1 - dist / radius, 3);
+}
+
+float Fluid::smoothingNearKernel(const float dist) const {
+  return nearKernel(dist, params.smoothingRadius);
+}
+
+float Fluid::computeNearDensity(const Particle &p) const { 
+  float density = 0.f;
+  for (const auto &j: particles){
+    if (&j != &p){
+      float dist = (p.position - j.position).mag();
+      density += smoothingNearKernel(dist);
+    }
+  }
+  return density;
+}
+
 float Fluid::smoothingKernel(const float dist) const {
   return kernel(dist, params.smoothingRadius);
 }
@@ -39,32 +62,43 @@ float Fluid::computeDensity(const Particle &p) const {
   return density;
 }
 
-float Fluid::computePseudoPressure(const float density) const{ 
+inline float Fluid::computeNearPseudoPressure(const float nearDensity) const { 
+  return params.nearPressureMultiplier * nearDensity;
+}
+
+inline float Fluid::computePseudoPressure(const float density) const{ 
   return params.pressureMultiplier * (density - params.targetDensity);
 }
 
-Vec Fluid::relaxationDisplacement(const float deltaTime, 
-                                  const float density, 
-                                  const Particle &i, 
-                                  const Particle &j) const 
-{ 
+Vec Fluid::relaxationDisplacement(const Particle &i,
+  const Particle &j, 
+  const float deltaTime, 
+  const float pressure, 
+  const float nearPressure) const {
   Vec rij = i.position - j.position;
-  Vec rijUnit = rij / rij.mag();
-  return rijUnit * -std::pow(deltaTime, 2) * density * (1.f - rij.mag() / params.smoothingRadius);
+  if (rij.mag() == 0.f){ 
+    return Vec(0,0);
+  }
+  Vec rijUnit = rij / rij.mag(); 
+  return rijUnit * (
+      pressure * (1.f - rij.mag() / params.smoothingRadius) + 
+      nearPressure * std::pow(1.f - rij.mag() / params.smoothingRadius, 2)
+    );
 }
-
 void Fluid::doubleDensityRelaxation(float deltaTime) { 
   for (auto &i : particles){ 
     Vec predicted = i.position + deltaTime * i.velocity;
     float density = computeDensity(i);
     float pressure = computePseudoPressure(density);
+    float nearDensity = computeNearDensity(i);
+    float nearPressure = computeNearPseudoPressure(nearDensity);
     Vec dx(0, 0);
     for (auto &j : particles) { 
       float q = (i.position - j.position).mag() / params.smoothingRadius;
       if (&j != &i && q < 1.f){
-        Vec displacement = relaxationDisplacement(deltaTime, density, i, j);
-        j.position += displacement / 2.f;
-        dx -= displacement / 2.f;
+        Vec displacement = relaxationDisplacement(i, j, deltaTime, pressure, nearPressure);
+        j.position -= displacement / 2.f;
+        dx += displacement / 2.f;
       }
     }
     i.position += dx;
@@ -140,6 +174,8 @@ void Fluid::applyViscosity(float deltaTime) {
     for (auto &j: particles){
       Vec rij = i.position - j.position;
       float q = rij.mag() / params.smoothingRadius; 
+      if (&i == &j)
+        continue;
       if (q < 1.f){
         // inward velocity
         float u = (i.velocity - j.velocity).dot(rij / rij.mag());
@@ -151,8 +187,6 @@ void Fluid::applyViscosity(float deltaTime) {
           j.velocity += impulse;
         }
       }
-
     }
   }
 }
-

@@ -16,15 +16,16 @@ const int NCOLS = 25;
 
 class FluidParameters { 
 public: 
-  const float collisionDamping = .4f;
-  const float smoothingRadius = .06; //.08
+  const float collisionDamping = .1f;
+  const float smoothingRadius = .1; //.08
   const float particleMass = 1.f;
-  const bool isGravity = true;
-  const float targetDensity = 9.f;
-  const float pressureMultiplier = 100.5f;
+  const bool isGravity = false;
+  const float targetDensity = 3.5f;
+  const float pressureMultiplier = 0.005f;
+  const float nearPressureMultiplier = 0.001f;
   const float smoothingVolume = M_PI * std::pow(smoothingRadius, 8) / 4;
-  const float viscosityBeta = .0f; // high for highly viscous fluids else 0
-  const float viscosityDelta = 1.5f; 
+  const float viscosityBeta = 1.0; // non-zero for viscos fluids
+  const float viscosityDelta = 0.0f;
   FluidParameters() = default;
 };
 
@@ -36,9 +37,17 @@ private:
   void randomInit(int n);
   void boundryCollision(Particle &a);
   float smoothingKernel(const float dist) const;
+  float smoothingNearKernel(const float dist) const;
+  float computeNearDensity(const Particle &p) const;
   float computeDensity(const Particle &p) const;
+  float computeNearPseudoPressure(const float) const;
   float computePseudoPressure(const float) const;
-  Vec relaxationDisplacement(const float deltaTime, const float density, const Particle &, const Particle &) const;
+  Vec relaxationDisplacement(
+    const Particle &, 
+    const Particle &,
+    const float deltaTime,
+    const float pressure,
+    const float nearPressure) const;
   void doubleDensityRelaxation(float deltaTime);
   void applyViscosity(float deltaTime);
 public:
