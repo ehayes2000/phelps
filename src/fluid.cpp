@@ -1,88 +1,107 @@
 #include "fluid.hpp"
 
 void Fluid::step(float deltaTime){
-  Vec gravity(0, deltaTime * GRAVITY);
-  computeAllDensities();
-  for (int i = 0; i < particles.size(); i ++){
-    particles[i].vel += particles[i].force * deltaTime;
-    particles[i].pos += particles[i].vel * deltaTime;
-    particles[i].force = Vec(0,0);
-    // particles[i].force += 
-    Vec pressure = computePressureForce(particles[i].pos);
-    pressure /= densities[i] != 0.f ? densities[i] : 1.f;
-    particles[i].force += pressure;
-    boundryCollision(particles[i]);
-    if (params.isGravity){
-      particles[i].vel -= gravity;
+  if (params.isGravity){
+    for (auto &p: particles){
+      p.velocity += Vec(0.f, -deltaTime * GRAVITY);
     }
   }
-  std::cout << computeAvgDensity() << std::endl;
+  applyViscosity(deltaTime);
+  for (auto &p : particles){
+    p.positionPrev = p.position;
+    p.position += deltaTime * p.velocity;
+  }
+  doubleDensityRelaxation(deltaTime);
+  for (auto &p: particles){
+    p.velocity = (p.position - p.positionPrev) / deltaTime;
+    boundryCollision(p);
+  }
 }
 
-void Fluid::gridInit(int cols, int n, float gap){
-  float xSpace = (cols - 1) * gap;
-  int nRows = std::ceil(static_cast<float>(n) / static_cast<float>(cols));
-  float ySpace = (nRows - 1) * gap;
-  const float xStart = (boundSize.x / 2) - (xSpace / 2);
-  float x = xStart;
-  float y = (boundSize.y / 2) + (ySpace / 2);
-  int created = 0;
-  for (int r = 0; r < nRows && created < n; r++, y -= gap) { 
-    for (int c = 0; c < cols && created < n; c++, x += gap, created ++){
-      particles[created] = Particle(x, y, 0, 0);
+float kernel(const float dist, const float radius) { 
+  if (dist > radius)
+    return 0.f;
+  return std::pow(1 - dist / radius, 2);
+}
+
+float Fluid::smoothingKernel(const float dist) const {
+  return kernel(dist, params.smoothingRadius);
+}
+
+float Fluid::computeDensity(const Particle &p) const { 
+  float density = 0.f;
+  for (const auto &j: particles){
+    if (&j != &p){
+      float dist = (p.position - j.position).mag();
+      density += smoothingKernel(dist);
     }
-    x = xStart;
+  }
+  return density;
+}
+
+float Fluid::computePseudoPressure(const float density) const{ 
+  return params.pressureMultiplier * (density - params.targetDensity);
+}
+
+Vec Fluid::relaxationDisplacement(const float deltaTime, 
+                                  const float density, 
+                                  const Particle &i, 
+                                  const Particle &j) const 
+{ 
+  Vec rij = i.position - j.position;
+  Vec rijUnit = rij / rij.mag();
+  return rijUnit * -std::pow(deltaTime, 2) * density * (1.f - rij.mag() / params.smoothingRadius);
+}
+
+void Fluid::doubleDensityRelaxation(float deltaTime) { 
+  for (auto &i : particles){ 
+    Vec predicted = i.position + deltaTime * i.velocity;
+    float density = computeDensity(i);
+    float pressure = computePseudoPressure(density);
+    Vec dx(0, 0);
+    for (auto &j : particles) { 
+      float q = (i.position - j.position).mag() / params.smoothingRadius;
+      if (&j != &i && q < 1.f){
+        Vec displacement = relaxationDisplacement(deltaTime, density, i, j);
+        j.position += displacement / 2.f;
+        dx -= displacement / 2.f;
+      }
+    }
+    i.position += dx;
+  } 
+}
+
+
+void Fluid::applyForce(Vec &p, float force, float radius){ 
+  for (auto &particle : particles) { 
+    Vec offset = particle.position - p;
+    float dist = offset.mag();
+    if (dist < radius){
+      float influence = kernel(dist, radius);
+      Vec force = (offset / dist) * influence; 
+      particle.velocity += force;
+    }
   }
 }
 
 void Fluid::boundryCollision(Particle &a){
   Vec minBound = Vec(0, 0) + Vec(radius, radius);
   Vec maxBound = boundSize - Vec(radius, radius);
-
   // X-axis collision
-  if (a.pos.x < minBound.x) {
-      a.pos.x = minBound.x;
-      a.vel.x = -a.vel.x * params.collisionDamping;
-  } else if (a.pos.x > maxBound.x) {
-      a.pos.x = maxBound.x;
-      a.vel.x = -a.vel.x * params.collisionDamping;
+  if (a.position.x < minBound.x) {
+      a.position.x = minBound.x;
+      a.velocity.x = -a.velocity.x * params.collisionDamping;
+  } else if (a.position.x > maxBound.x) {
+      a.position.x = maxBound.x;
+      a.velocity.x = -a.velocity.x * params.collisionDamping;
   }
   // Y-axis collision
-  if (a.pos.y < minBound.y) {
-      a.pos.y = minBound.y;
-      a.vel.y = -a.vel.y * params.collisionDamping;
-  } else if (a.pos.y > maxBound.y) {
-      a.pos.y = maxBound.y;
-      a.vel.y = -a.vel.y * params.collisionDamping;
-  }
-}
-
-float Fluid::smoothingKernel(const float &radius, const float &dst) const {
-  if (dst >= radius)
-    return 0;
-  double volume = (M_PI * std::pow(radius, 4)) / 6.f;
-  return std::pow(radius - dst, 2) / volume;
-}
-
-float Fluid::smoothingKernelDerivative(const float &radius, const float &dst) const {
-  if (dst >= radius) return 0;
-  float scale = 12.f / (std::pow(radius, 4) * M_PI);
-  return (dst - radius) * scale;
-}
-
-float Fluid::computeDensity(const Vec &p) const { 
-  float density = .000001f;
-  for (const auto &x : particles){ 
-    float dst = (x.pos - p).mag();
-    float influence = smoothingKernel(params.smoothingRadius, dst);
-    density += params.particleMass * influence;
-  }
-  return density;
-}
-
-void Fluid::computeAllDensities() { 
-  for (int i = 0; i < particles.size(); i ++){
-    densities[i] = computeDensity(particles[i].pos);
+  if (a.position.y < minBound.y) {
+      a.position.y = minBound.y;
+      a.velocity.y = -a.velocity.y * params.collisionDamping;
+  } else if (a.position.y > maxBound.y) {
+      a.position.y = maxBound.y;
+      a.velocity.y = -a.velocity.y * params.collisionDamping;
   }
 }
 
@@ -93,39 +112,47 @@ void Fluid::randomInit(int n){
     float y = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * boundSize.y;
     particles[i] = 
       Particle(
-        x, y,
-        0, 0
+        x, y
       );
   }
 }
-float Fluid::densityToPressure(const float &density) const { 
-  float err = density - params.targetDensity;
-  return err * params.pressureMultiplier;
-}
 
-const Vec Fluid::computePressureForce(const Vec& p){
-  Vec pressure = Vec(0, 0);
-  for (int i = 0; i < particles.size(); i ++){
-      if (&p == &particles[i].pos)
-        continue;
-      float dst = (particles[i].pos - p).mag();
-      Vec dir = Vec(particles[i].pos - p) / dst;
-      float slope = smoothingKernelDerivative(params.smoothingRadius, dst);
-      float density = densities[i];
-      pressure += densityToPressure(density) * dir * slope / density;
+void Fluid::gridInit(int cols, float gap){
+  float xSpace = (cols - 1) * gap;
+  int n = particles.size();
+  int nRows = std::ceil(static_cast<float>(n)/ static_cast<float>(cols));
+  float ySpace = (nRows - 1) * gap;
+  
+  const float xStart = (boundSize.x / 2) - (xSpace / 2);
+  float x = xStart;
+  float y = (boundSize.y / 2) + (ySpace / 2);
+  int created = 0;
+  for (int r = 0; r < nRows && created < n; r++, y -= gap) { 
+    for (int c = 0; c < cols && created < n; c++, x += gap, created ++){
+      particles[created] = Particle(x, y);
+    }
+    x = xStart;
   }
-  return pressure;
 }
 
-void Fluid::applyForce(Vec &p, float force, float radius){ 
-  for (auto &particle : particles) { 
-    Vec offset = particle.pos - p;
-    float dist = offset.mag();
-    if (dist < radius){
-      float influence = smoothingKernel(radius, dist);
-      Vec force = (offset / dist) * influence; 
-      particle.force += force;
-      
+void Fluid::applyViscosity(float deltaTime) { 
+  for (auto &i: particles) {
+    for (auto &j: particles){
+      Vec rij = i.position - j.position;
+      float q = rij.mag() / params.smoothingRadius; 
+      if (q < 1.f){
+        // inward velocity
+        float u = (i.velocity - j.velocity).dot(rij / rij.mag());
+        if (u > 0){
+          Vec impulse = deltaTime * (1 - q)
+          * (params.viscosityDelta * u + params.viscosityBeta*std::pow(u,2))
+          * rij / rij.mag();
+          i.velocity -= impulse;
+          j.velocity += impulse;
+        }
+      }
+
     }
   }
 }
+

@@ -62,14 +62,16 @@ public:
     y /= v;
     return *this;
   }
-
   friend std::ostream& operator<<(std::ostream& os, const Vec& v){
     os << "<" << v.x << ", " << v.y << ">";
     return os;
   }
-  float mag(){
+  float mag() const {
     return std::sqrt(
       std::pow(x, 2) + std::pow(y, 2)
     );
+  }
+  float dot(const Vec& b) const { 
+    return x*b.x + y*b.y;
   }
 };
