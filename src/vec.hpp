@@ -72,6 +72,6 @@ public:
     );
   }
   float dot(const Vec& b) const { 
-    return nan("hehexd");
+    return x * b.x + y * b.y;
   }
 };

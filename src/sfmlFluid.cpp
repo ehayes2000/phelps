@@ -3,8 +3,9 @@
 
 sf::CircleShape *SfmlFluid::makeDrawable(const Particle &p)
 {
-  sf::CircleShape *c = new sf::CircleShape(fluid.radius * scale);
-  Vec rCords = stor(p.position);
+  sf::CircleShape *c = new sf::CircleShape(fluid.radius * fluid.getScale());
+  Vec rCords = fluid.stor(p.position);
+  std::cout << "drawble " << p.position << " ->  " << rCords << std::endl;
   c->setPosition(rCords.x, rCords.y);
   c->setFillColor(sf::Color::Blue);
   return c;
@@ -25,7 +26,7 @@ void SfmlFluid::updateDrawables()
 {
   for (int i = 0; i < fluid.getParticles().size(); i++)
   {
-    Vec rCords = stor(fluid.getParticles()[i].position);
+    Vec rCords = fluid.stor(fluid.getParticles()[i].position);
     float speed = fluid.getParticles()[i].velocity.mag();
     sf::Color c = plasmaGradient(speed, 0, .3f);
     drawables[i]->setFillColor(c);
@@ -68,6 +69,8 @@ void SfmlFluid::startRenderLoop()
       }
       if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
       {
+        std::vector<std::vector<float>> grid(height, std::vector<float>(width, 0.f));
+        fluid.computeDensityGrid(grid);
         isPaused = !isPaused;
         deltaTime = clock.restart().asSeconds();
         std::cout << "avg density: " << fluid.computeAvgDensity() << std::endl;
@@ -75,7 +78,7 @@ void SfmlFluid::startRenderLoop()
       if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left)
       {
         isLClick = true;
-        Vec simPoint = rtos(Vec(event.mouseButton.x, event.mouseButton.y));
+        Vec simPoint = fluid.rtos(Vec(event.mouseButton.x, event.mouseButton.y));
         fluid.applyForce(simPoint, .05, 0.15f);
       }
       else if (event.type == sf::Event::MouseButtonReleased)
@@ -85,7 +88,7 @@ void SfmlFluid::startRenderLoop()
       else if (sf::Event::MouseMoved && isLClick)
       {
         sf::Vector2i mPos = sf::Mouse::getPosition(window);
-        Vec simPoint = rtos(Vec(mPos.x, mPos.y));
+        Vec simPoint = fluid.rtos(Vec(mPos.x, mPos.y));
         fluid.applyForce(simPoint, .5f, 0.1f);
       }
     }
@@ -99,30 +102,6 @@ void SfmlFluid::startRenderLoop()
    
   }
 }
-
-Vec SfmlFluid::stor(const Vec &p) const
-{
-  /*
-    Transorm simulation points to render points.
-    Flip y axis
-    offset by radius
-    // p.x * scale,
-    // winHeight - (p.y * scale)
-  */
-  return Vec(
-      scale * (p.x - fluid.radius),
-      scale * (fluid.boundSize.y - p.y - fluid.radius));
-}
-
-Vec SfmlFluid::rtos(const Vec &p) const
-{
-  // transform render point to simulation point
-  // DOES NOT transform radius
-  return Vec(
-      p.x / scale,
-      (fluid.boundSize.y - p.y / scale));
-}
-
 
 sf::Color SfmlFluid::plasmaGradient(float value, float minValue, float maxValue) const {
     // Normalize the value to a range between 0 and 1

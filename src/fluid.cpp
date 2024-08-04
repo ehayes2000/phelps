@@ -59,7 +59,7 @@ float Fluid::computeDensity(const Particle &p) const {
       density += smoothingKernel(dist);
     }
   }
-  return density;
+  return density / params.smoothingVolume;
 }
 
 inline float Fluid::computeNearPseudoPressure(const float nearDensity) const { 
@@ -188,5 +188,15 @@ void Fluid::applyViscosity(float deltaTime) {
         }
       }
     }
+  }
+}
+
+void Fluid::computeDensityGrid(std::vector<std::vector<float>> &grid) const {
+  const int height = grid.size();
+  const int width = grid.at(0).size();
+  const float scale = 1.0f / static_cast<float>(std::max(height, width));
+  grid = std::vector<std::vector<float>>(height, std::vector<float>(width, 0.0f));
+  for (const auto &p : particles) { 
+    
   }
 }
