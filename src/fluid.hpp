@@ -17,10 +17,10 @@ const int NCOLS = 25;
 class FluidParameters { 
 public: 
   const float collisionDamping = .1f;
-  const float smoothingRadius = .1; //.08
+  const float smoothingRadius = .15; //.08
   const float particleMass = 1.f;
-  const bool isGravity = true;
-  const float targetDensity = 3.;
+  const bool isGravity = false;
+  const float targetDensity = 5.;
   const float pressureMultiplier = 0.005f;
   const float nearPressureMultiplier = 0.001f;
   const float smoothingVolume = 2 * M_PI * smoothingRadius / 3.0;
@@ -47,6 +47,7 @@ private:
   void gridInit(int cols, float gap);
   void randomInit(int n);
   void boundryCollision(Particle &a);
+  void normalizeDensityGrid(std::vector<std::vector<float>>&) const;
   Vec relaxationDisplacement(
     const Particle &, 
     const Particle &,

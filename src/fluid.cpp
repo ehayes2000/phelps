@@ -192,11 +192,43 @@ void Fluid::applyViscosity(float deltaTime) {
 }
 
 void Fluid::computeDensityGrid(std::vector<std::vector<float>> &grid) const {
-  const int height = grid.size();
-  const int width = grid.at(0).size();
-  const float scale = 1.0f / static_cast<float>(std::max(height, width));
-  grid = std::vector<std::vector<float>>(height, std::vector<float>(width, 0.0f));
+  // expect zeroed vector of size renderWidth, renderWidth
+  const int pxRadius = params.smoothingRadius * scale;
   for (const auto &p : particles) { 
-    
+    Vec px = stor(p.position);
+    for (int row = px.y - pxRadius; row <= px.y + pxRadius; row ++) {
+      for (int col = px.x - pxRadius; col <= px.x + pxRadius; col ++){
+        if (row < 0 || row >= renderHeight || col < 0 || col >= renderWidth){
+          continue;
+        }
+        Vec rp = rtos(Vec(col, row));
+        float dist = (rp - p.position).mag();
+        grid[row][col] += smoothingKernel(dist);
+      }
+    }
+  }
+  for (auto &row: grid){
+    for (int i = 0; i < row.size(); ++i){
+      row[i] -= params.targetDensity;
+    }
+  }
+  normalizeDensityGrid(grid);
+}
+
+void Fluid::normalizeDensityGrid(std::vector<std::vector<float>> &grid) const{ 
+  float min = std::numeric_limits<float>::max();
+  float max = std::numeric_limits<float>::min();
+  for (const auto &v : grid){
+    auto [ rowMin, rowMax ] = std::minmax_element(v.begin(), v.end());
+    min = std::min(min, *rowMin);
+    max = std::max(max, *rowMax);
+    max = std::max(max, std::abs(min));
+  }
+  std::cout << min<< ", " << max << std::endl;
+  for (auto &row: grid){
+    for (int i = 0; i < row.size(); i ++){
+      row[i] /= max;
+    }
   }
 }
+

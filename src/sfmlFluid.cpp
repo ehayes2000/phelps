@@ -47,6 +47,22 @@ void SfmlFluid::renderParticles() {
     // Display the contents of the window
     window.display();
 }
+
+sf::Color getPressureColor(float pressure) {
+    // Ensure pressure is in the range [-1, 1]
+    pressure = std::max(-1.0f, std::min(1.0f, pressure));
+    
+    // Convert pressure to a value between 0 and 1
+    float t = (pressure + 1.0f) / 2.0f;
+    
+    // Calculate RGB values
+    int r = static_cast<int>(std::min(255.0f, 510.0f * t));
+    int b = static_cast<int>(std::min(255.0f, 510.0f * (1.0f - t)));
+    int g = 255 - std::abs(r - b);
+
+    return sf::Color(r, g, b);
+}
+
 void SfmlFluid::startRenderLoop()
 {
 
@@ -57,6 +73,7 @@ void SfmlFluid::startRenderLoop()
   float deltaTime = 0.0f;
   bool isPaused = true;
   bool isLClick = false;
+  std::vector<std::vector<float>> densityGrid(height, std::vector<float>(width, 0.0f));
   while (window.isOpen())
   {
     // Process events
@@ -69,11 +86,31 @@ void SfmlFluid::startRenderLoop()
       }
       if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
       {
-        std::vector<std::vector<float>> grid(height, std::vector<float>(width, 0.f));
-        fluid.computeDensityGrid(grid);
+        for (auto &v: densityGrid){
+          for (int i = 0; i < v.size(); i++){
+            v[i] = 0.f;
+          }
+        }
+        fluid.computeDensityGrid(densityGrid);
         isPaused = !isPaused;
         deltaTime = clock.restart().asSeconds();
         std::cout << "avg density: " << fluid.computeAvgDensity() << std::endl;
+
+        sf::Image image;
+        image.create(width, height);
+        for (int y = 0; y < height; y++){
+          for (int x = 0; x < width; x++){
+            sf::Color c = getPressureColor(densityGrid[y][x]);
+            image.setPixel(x, y, c);
+          }
+        }
+        
+        sf::Texture texture;
+        texture.loadFromImage(image);
+        sf::Sprite sprite(texture);
+        window.draw(sprite);
+        window.display();
+
       }
       if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left)
       {
