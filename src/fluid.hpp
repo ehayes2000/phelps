@@ -8,6 +8,7 @@
 #include <vector> 
 #include <ostream>
 #include <iostream>
+#include <map>
 
 
 
@@ -34,10 +35,22 @@ public:
 class Fluid { 
 private:
   std::vector<Particle> particles;
+  std::vector<std::pair<Particle* , int>> particleGridCells;
+  std::unordered_map<int, int> gridStartIndices;
   Vec boundSize;
   int renderHeight;
   int renderWidth;
   float scale;
+
+  void sortParticlesIntoGrid();
+  std::vector<std::pair<Particle * , int>> 
+    gridParticles() const;
+  void sortGridParticles(std::vector<std::pair<Particle * , int>> &p);
+  std::unordered_map<int, int> 
+    mapGridStarts(std::vector<std::pair<Particle* , int>> &p) const;
+  int getGridCell(const Vec& ) const;
+  
+
   float smoothingKernel(const float dist) const;
   float smoothingNearKernel(const float dist) const;
   float computeNearDensity(const Particle &p) const;
