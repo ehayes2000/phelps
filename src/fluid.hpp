@@ -11,22 +11,22 @@
 
 
 
-const float GRAVITY = 5.f;
+const float GRAVITY = 1.f;
 const int NCOLS = 25;
 
 class FluidParameters { 
 public: 
-  const float collisionDamping = .1f;
-  const float smoothingRadius = .15; //.08
+  const float collisionDamping = .0f;
+  const float smoothingRadius = .04; //.08
   const float particleMass = 1.f;
-  const bool isGravity = false;
+  const bool isGravity = true;
   const float targetDensity = 5.;
-  const float pressureMultiplier = 0.005f;
-  const float nearPressureMultiplier = 0.001f;
+  const float pressureMultiplier = 0.0005f;
+  const float nearPressureMultiplier = 0.01f;
   const float smoothingVolume = 2 * M_PI * smoothingRadius / 3.0;
   const float smoothingNearVolume = 2 * M_PI * smoothingRadius / 3.0;
-  const float viscosityBeta = 0.0; // non-zero for viscos fluids
-  const float viscosityDelta = .9f;
+  const float viscosityBeta = 0.9; // non-zero for viscos fluids
+  const float viscosityDelta = .0f;
   FluidParameters() = default;
 };
 

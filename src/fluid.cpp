@@ -59,7 +59,7 @@ float Fluid::computeDensity(const Particle &p) const {
       density += smoothingKernel(dist);
     }
   }
-  return density / params.smoothingVolume;
+  return density;
 }
 
 inline float Fluid::computeNearPseudoPressure(const float nearDensity) const { 
@@ -112,8 +112,8 @@ void Fluid::applyForce(Vec &p, float force, float radius){
     float dist = offset.mag();
     if (dist < radius){
       float influence = kernel(dist, radius);
-      Vec force = (offset / dist) * influence; 
-      particle.velocity += force;
+      Vec forceVec = (offset / dist) * influence * force; 
+      particle.velocity += forceVec;
     }
   }
 }
@@ -224,7 +224,6 @@ void Fluid::normalizeDensityGrid(std::vector<std::vector<float>> &grid) const{
     max = std::max(max, *rowMax);
     max = std::max(max, std::abs(min));
   }
-  std::cout << min<< ", " << max << std::endl;
   for (auto &row: grid){
     for (int i = 0; i < row.size(); i ++){
       row[i] /= max;

@@ -5,7 +5,6 @@ sf::CircleShape *SfmlFluid::makeDrawable(const Particle &p)
 {
   sf::CircleShape *c = new sf::CircleShape(fluid.radius * fluid.getScale());
   Vec rCords = fluid.stor(p.position);
-  std::cout << "drawble " << p.position << " ->  " << rCords << std::endl;
   c->setPosition(rCords.x, rCords.y);
   c->setFillColor(sf::Color::Blue);
   return c;
@@ -49,12 +48,9 @@ void SfmlFluid::renderParticles() {
 }
 
 sf::Color getPressureColor(float pressure) {
-    // Ensure pressure is in the range [-1, 1]
-    pressure = std::max(-1.0f, std::min(1.0f, pressure));
-    
     // Convert pressure to a value between 0 and 1
     float t = (pressure + 1.0f) / 2.0f;
-    
+     
     // Calculate RGB values
     int r = static_cast<int>(std::min(255.0f, 510.0f * t));
     int b = static_cast<int>(std::min(255.0f, 510.0f * (1.0f - t)));
@@ -116,7 +112,7 @@ void SfmlFluid::startRenderLoop()
       {
         isLClick = true;
         Vec simPoint = fluid.rtos(Vec(event.mouseButton.x, event.mouseButton.y));
-        fluid.applyForce(simPoint, .05, 0.15f);
+        fluid.applyForce(simPoint, .2, 0.2f);
       }
       else if (event.type == sf::Event::MouseButtonReleased)
       {
@@ -126,7 +122,7 @@ void SfmlFluid::startRenderLoop()
       {
         sf::Vector2i mPos = sf::Mouse::getPosition(window);
         Vec simPoint = fluid.rtos(Vec(mPos.x, mPos.y));
-        fluid.applyForce(simPoint, .5f, 0.1f);
+        fluid.applyForce(simPoint, .2f, 0.2f);
       }
     }
     if (isPaused)
