@@ -3,6 +3,7 @@
 #include "vec.hpp"
 #include "particle.hpp"
 #include "gridView.hpp"
+#include "adjacentParticles.hpp"
 
 #include <numeric>
 #include <cmath>
@@ -17,8 +18,6 @@ const float GRAVITY = 1.f;
 const int NCOLS = 25;
 
 class FluidParameters { 
-public: 
-  using Particles = std::vector<Particle>;
 public: 
   const float collisionDamping = .0f;
   const float smoothingRadius = .04; //.08

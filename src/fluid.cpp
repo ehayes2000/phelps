@@ -68,7 +68,7 @@ float Fluid::smoothingKernel(const float dist) const
 float Fluid::computeDensity(const Particle &p) const
 {
   float density = 0.f;
-  for (const auto &j : particles)
+  for (const auto &j : grid.adj(p))
   {
     if (&j != &p)
     {
@@ -105,13 +105,6 @@ Vec Fluid::relaxationDisplacement(const Particle &i,
                     nearPressure * std::pow(1.f - rij.mag() / params.smoothingRadius, 2));
 }
 
-/*
-  this->grid.sort();
-  for (auto &j: particles){
-    for (auto &i: this->grid.adj(j)) 
-  
-  }
-*/
 void Fluid::doubleDensityRelaxation(float deltaTime)
 {
   for (auto &i : particles)
@@ -122,7 +115,7 @@ void Fluid::doubleDensityRelaxation(float deltaTime)
     float nearDensity = computeNearDensity(i);
     float nearPressure = computeNearPseudoPressure(nearDensity);
     Vec dx(0, 0);
-    for (auto &j : particles)
+    for (auto &j : grid.adj(i))
     {
       float q = (i.position - j.position).mag() / params.smoothingRadius;
       if (&j != &i && q < 1.f)
@@ -217,7 +210,7 @@ void Fluid::applyViscosity(float deltaTime)
 {
   for (auto &i : particles)
   {
-    for (auto &j : particles)
+    for (auto &j : grid.adj(i))
     {
       Vec rij = i.position - j.position;
       float q = rij.mag() / params.smoothingRadius;

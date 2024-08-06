@@ -1,4 +1,5 @@
 #include "gridView.hpp"
+#include "adjacentParticles.hpp"
 
 static const unsigned int k1 = 15823;
 static const unsigned int k2 = 9737333;
@@ -14,4 +15,8 @@ void GridView::gridify(Particles &particles) {
   for (Particle &p: particles){
     cells[hashCell(p.position)].push_back(&p);
   }
+}
+
+AdjacentParticles GridView::adj(const Particle &p) const {
+  return AdjacentParticles(p.position, *this);
 }

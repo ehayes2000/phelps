@@ -259,6 +259,30 @@ sfml-audio/fast:
 	$(MAKE) $(MAKESILENT) -f _deps/sfml-build/src/SFML/Audio/CMakeFiles/sfml-audio.dir/build.make _deps/sfml-build/src/SFML/Audio/CMakeFiles/sfml-audio.dir/build
 .PHONY : sfml-audio/fast
 
+src/adjacentParticles.o: src/adjacentParticles.cpp.o
+.PHONY : src/adjacentParticles.o
+
+# target to build an object file
+src/adjacentParticles.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/adjacentParticles.cpp.o
+.PHONY : src/adjacentParticles.cpp.o
+
+src/adjacentParticles.i: src/adjacentParticles.cpp.i
+.PHONY : src/adjacentParticles.i
+
+# target to preprocess a source file
+src/adjacentParticles.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/adjacentParticles.cpp.i
+.PHONY : src/adjacentParticles.cpp.i
+
+src/adjacentParticles.s: src/adjacentParticles.cpp.s
+.PHONY : src/adjacentParticles.s
+
+# target to generate assembly for a file
+src/adjacentParticles.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/adjacentParticles.cpp.s
+.PHONY : src/adjacentParticles.cpp.s
+
 src/fluid.o: src/fluid.cpp.o
 .PHONY : src/fluid.o
 
@@ -375,6 +399,9 @@ help:
 	@echo "... sfml-network"
 	@echo "... sfml-system"
 	@echo "... sfml-window"
+	@echo "... src/adjacentParticles.o"
+	@echo "... src/adjacentParticles.i"
+	@echo "... src/adjacentParticles.s"
 	@echo "... src/fluid.o"
 	@echo "... src/fluid.i"
 	@echo "... src/fluid.s"

@@ -68,6 +68,10 @@ public:
     y /= v;
     return *this;
   }
+
+  bool operator==(const Vec& v) const {
+    return x == v.x && y == v.y;
+  }
   friend std::ostream& operator<<(std::ostream& os, const Vec& v){
     os << "<" << v.x << ", " << v.y << ">";
     return os;
