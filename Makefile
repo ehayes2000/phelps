@@ -307,29 +307,29 @@ src/fluid.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/fluid.cpp.s
 .PHONY : src/fluid.cpp.s
 
-src/gridView.o: src/gridView.cpp.o
-.PHONY : src/gridView.o
+src/grid.o: src/grid.cpp.o
+.PHONY : src/grid.o
 
 # target to build an object file
-src/gridView.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/gridView.cpp.o
-.PHONY : src/gridView.cpp.o
+src/grid.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/grid.cpp.o
+.PHONY : src/grid.cpp.o
 
-src/gridView.i: src/gridView.cpp.i
-.PHONY : src/gridView.i
+src/grid.i: src/grid.cpp.i
+.PHONY : src/grid.i
 
 # target to preprocess a source file
-src/gridView.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/gridView.cpp.i
-.PHONY : src/gridView.cpp.i
+src/grid.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/grid.cpp.i
+.PHONY : src/grid.cpp.i
 
-src/gridView.s: src/gridView.cpp.s
-.PHONY : src/gridView.s
+src/grid.s: src/grid.cpp.s
+.PHONY : src/grid.s
 
 # target to generate assembly for a file
-src/gridView.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/gridView.cpp.s
-.PHONY : src/gridView.cpp.s
+src/grid.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/phelps.dir/build.make CMakeFiles/phelps.dir/src/grid.cpp.s
+.PHONY : src/grid.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -405,9 +405,9 @@ help:
 	@echo "... src/fluid.o"
 	@echo "... src/fluid.i"
 	@echo "... src/fluid.s"
-	@echo "... src/gridView.o"
-	@echo "... src/gridView.i"
-	@echo "... src/gridView.s"
+	@echo "... src/grid.o"
+	@echo "... src/grid.i"
+	@echo "... src/grid.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

@@ -2,17 +2,13 @@
 
 const AdjacentParticles::iterator::ParticlesView*
 AdjacentParticles::iterator::getCollection() const { 
-  Vec offsetPoint = adjacent.point + 
-    ADJACENT_OFFSETS[offset_i] * adjacent.grid.cellSize;
-  int cellId = adjacent.grid.hashCell(offsetPoint);
-  if (adjacent.grid.cells.find(cellId) == adjacent.grid.cells.end())
-    return nullptr;
-  return &adjacent.grid.cells.at(cellId);
+  Vec offsetPoint = adjacent.point + adjacent.grid.adjacentOffsets[offset_i];
+  return adjacent.grid.viewCell(offsetPoint);
 }
 
 void AdjacentParticles::iterator::init() { 
   particle_i = 0;
-  while (offset_i < ADJACENT_CELLS) {
+  while (offset_i < Grid::ADJACENT_CELLS) {
     const ParticlesView* collection = getCollection();
     if (collection && !collection->empty()){
       return;
@@ -22,7 +18,7 @@ void AdjacentParticles::iterator::init() {
 }
 
 void AdjacentParticles::iterator::next() { 
-  while (offset_i < ADJACENT_CELLS){
+  while (offset_i < Grid::ADJACENT_CELLS){
     const ParticlesView* collection = getCollection();
     // collection exists and is not iterated through
     if (collection && particle_i + 1 < collection->size()){

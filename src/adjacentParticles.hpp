@@ -1,22 +1,13 @@
 #pragma once
-#include "adjacentParticles.hpp"
-#include "gridView.hpp"
+#include "grid.hpp"
 #include "particle.hpp"
 #include "vec.hpp"
-
-static const short ADJACENT_CELLS = 9;
-static const Vec ADJACENT_OFFSETS[ADJACENT_CELLS] = {
-  Vec(-1, -1), Vec(0, -1), Vec(1, -1),
-  Vec(-1, 0),  Vec(0, 0), Vec(1, 0),
-  Vec(-1, 1),  Vec(0, 1), Vec(1, 1)
-};
-
 
 class AdjacentParticles
 {
 private:
   const Vec &point;
-  const GridView &grid;
+  const Grid &grid;
 public:
   class iterator
   {
@@ -26,7 +17,7 @@ public:
     using value_type = Particle;
     using pointer = Particle *;
     using reference = Particle &;
-    using ParticlesView = GridView::ParticlesView;
+    using ParticlesView = Grid::ParticlesView;
 
   public:
     explicit iterator(
@@ -54,6 +45,7 @@ public:
     bool operator==(const iterator &it) const { 
       return adjacent.point == it.adjacent.point && offset_i == it.offset_i && particle_i == it.particle_i; 
     }
+
     bool operator!=(const iterator &it) const { return !(*this==it); }
 
   private:
@@ -66,7 +58,7 @@ public:
   };
 
 public:
-  AdjacentParticles(const Vec &point, const GridView &grid): 
+  AdjacentParticles(const Vec &point, const Grid &grid): 
     point(point), 
     grid(grid)
   {}
@@ -75,6 +67,6 @@ public:
     return iterator(*this, 0, 0);
   }
   iterator end() { 
-    return iterator(*this, ADJACENT_CELLS, 0);
+    return iterator(*this, Grid::ADJACENT_CELLS, 0);
   }
 };

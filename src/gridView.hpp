@@ -1,26 +1,24 @@
 #pragma once
 #include "particle.hpp"
+#include "grid.hpp"
+#include "adjacentParticles.hpp"
 #include <iostream> 
 #include <map>
 
-class AdjacentParticles;
 class GridView { 
 public:
-  friend AdjacentParticles;
   using Particles = std::vector<Particle>;
   using ParticlesView = std::vector<Particle*>;
 public:
-  GridView(Vec boundSize, float smoothingRadius): 
-    cellSize(smoothingRadius),
-    nCells((boundSize.x / smoothingRadius) * (boundSize.y / smoothingRadius))
+  GridView(const Vec &boundSize, float smoothingRadius): 
+    grid(boundSize, smoothingRadius)
     {}
-  void gridify(Particles &);
-  AdjacentParticles adj(const Particle &) const;
+  void gridify(Particles &ps) { grid.gridify(ps); }
+  AdjacentParticles adj(const Particle &p) const { 
+    return AdjacentParticles(p.position, grid);
+  }
 private:
-  float cellSize;
-  int nCells;
-  std::unordered_map<int, ParticlesView> cells;
-  int hashCell(const Vec &) const;
+  Grid grid;
 };
 
 
