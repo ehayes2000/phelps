@@ -2,6 +2,7 @@
 
 #include "vec.hpp"
 #include "particle.hpp"
+#include "gridView.hpp"
 
 #include <numeric>
 #include <cmath>
@@ -11,16 +12,18 @@
 #include <map>
 
 
-
+ 
 const float GRAVITY = 1.f;
 const int NCOLS = 25;
 
 class FluidParameters { 
 public: 
+  using Particles = std::vector<Particle>;
+public: 
   const float collisionDamping = .0f;
   const float smoothingRadius = .04; //.08
   const float particleMass = 1.f;
-  const bool isGravity = true;
+  const bool isGravity = false;
   const float targetDensity = 5.;
   const float pressureMultiplier = 0.0005f;
   const float nearPressureMultiplier = 0.01f;
@@ -33,42 +36,8 @@ public:
 
 
 class Fluid { 
-private:
-  std::vector<Particle> particles;
-  std::vector<std::pair<Particle* , int>> particleGridCells;
-  std::unordered_map<int, int> gridStartIndices;
-  Vec boundSize;
-  int renderHeight;
-  int renderWidth;
-  float scale;
-
-  void sortParticlesIntoGrid();
-  std::vector<std::pair<Particle * , int>> 
-    gridParticles() const;
-  void sortGridParticles(std::vector<std::pair<Particle * , int>> &p);
-  std::unordered_map<int, int> 
-    mapGridStarts(std::vector<std::pair<Particle* , int>> &p) const;
-  int getGridCell(const Vec& ) const;
-  
-
-  float smoothingKernel(const float dist) const;
-  float smoothingNearKernel(const float dist) const;
-  float computeNearDensity(const Particle &p) const;
-  float computeDensity(const Particle &p) const;
-  float computeNearPseudoPressure(const float) const;
-  float computePseudoPressure(const float) const;
-  void gridInit(int cols, float gap);
-  void randomInit(int n);
-  void boundryCollision(Particle &a);
-  void normalizeDensityGrid(std::vector<std::vector<float>>&) const;
-  Vec relaxationDisplacement(
-    const Particle &, 
-    const Particle &,
-    const float deltaTime,
-    const float pressure,
-    const float nearPressure) const;
-  void doubleDensityRelaxation(float deltaTime);
-  void applyViscosity(float deltaTime);
+public:
+  using Particles = std::vector<Particle>;
 public:
   const float radius;
   FluidParameters params;
@@ -80,6 +49,7 @@ public:
     scale(std::max(width, height)),
     boundSize(static_cast<float>(width)/static_cast<float>(std::max(width, height)),
       static_cast<float>(height)/ static_cast<float>(std::max(width, height))),
+    grid(boundSize, params.smoothingRadius),
     renderHeight(height),
     renderWidth(width),
     radius(radius)
@@ -120,4 +90,30 @@ public:
     }
     return totalDensity / particles.size();
   }
+private:
+  Particles particles;
+  Vec boundSize;
+  GridView grid;
+  int renderHeight;
+  int renderWidth;
+  float scale;
+
+  float smoothingKernel(const float dist) const;
+  float smoothingNearKernel(const float dist) const;
+  float computeNearDensity(const Particle &p) const;
+  float computeDensity(const Particle &p) const;
+  float computeNearPseudoPressure(const float) const;
+  float computePseudoPressure(const float) const;
+  void gridInit(int cols, float gap);
+  void randomInit(int n);
+  void boundryCollision(Particle &a);
+  void normalizeDensityGrid(std::vector<std::vector<float>>&) const;
+  Vec relaxationDisplacement(
+    const Particle &, 
+    const Particle &,
+    const float deltaTime,
+    const float pressure,
+    const float nearPressure) const;
+  void doubleDensityRelaxation(float deltaTime);
+  void applyViscosity(float deltaTime);
 };

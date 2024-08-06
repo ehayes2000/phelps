@@ -3,6 +3,7 @@
 
 void Fluid::step(float deltaTime)
 {
+  grid.gridify(particles);
   if (deltaTime <= 0.f)
     return;
   if (params.isGravity)
@@ -103,6 +104,14 @@ Vec Fluid::relaxationDisplacement(const Particle &i,
   return rijUnit * (pressure * (1.f - rij.mag() / params.smoothingRadius) +
                     nearPressure * std::pow(1.f - rij.mag() / params.smoothingRadius, 2));
 }
+
+/*
+  this->grid.sort();
+  for (auto &j: particles){
+    for (auto &i: this->grid.adj(j)) 
+  
+  }
+*/
 void Fluid::doubleDensityRelaxation(float deltaTime)
 {
   for (auto &i : particles)
@@ -278,53 +287,4 @@ void Fluid::normalizeDensityGrid(std::vector<std::vector<float>> &grid) const
       row[i] /= max;
     }
   }
-}
-
-int Fluid::getGridCell(const Vec &p) const
-{
-  int x = p.x / params.smoothingRadius;
-  int y = p.y / params.smoothingRadius;
-  return ((x * 73856093) ^ (y * 19349663)) % particles.size();
-}
-
-std::vector<std::pair<Particle *, int>> Fluid::gridParticles() const
-{
-  std::vector<std::pair<Particle *, int>> pairs(particles.size());
-  std::transform(particles.begin(), particles.end(), pairs.begin(),
-                 [&](const Particle &p)
-                     -> std::pair<Particle *, int>
-                 {
-                   return {const_cast<Particle *>(&p), this->getGridCell(p.position)};
-                 });
-  return pairs;
-}
-
-void Fluid::sortGridParticles(
-    std::vector<std::pair<Particle *, int>> &p)
-{
-  std::sort(p.begin(), p.end(), [](const auto &a, const auto &b)
-            { return a.second < b.second; });
-}
-
-std::unordered_map<int, int> Fluid::mapGridStarts(
-    std::vector<std::pair<Particle *, int>> &p)
-    const
-{
-  std::unordered_map<int, int> gridStarts;
-  std::for_each(p.begin(), p.end(), [&gridStarts, lastGrid=-1, i=0](const auto &pair) 
-    mutable {
-      if (pair.second != lastGrid){
-        lastGrid = pair.second;
-        gridStarts.insert({pair.second, i});
-      }
-      i++;
-    }
-  );
-  return gridStarts;
-}
-
-void Fluid::sortParticlesIntoGrid() {
-  std::vector<std::pair<Particle *, int>> gridded = this->gridParticles(); 
-  sortGridParticles(gridded);
-  this->gridStartIndices = mapGridStarts(gridded);
 }

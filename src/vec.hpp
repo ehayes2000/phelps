@@ -15,7 +15,9 @@ public:
   }
   
   Vec& operator=(const Vec& v) { 
-    return *this = Vec(v);
+    x=v.x;
+    y=v.y;
+    return *this;
   }
 
   Vec operator/(const float& s) const { 
