@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "fluid.hpp"
 
-const int N_PARTICLES = 1000;
+const int N_PARTICLES = 300;
 
 class SfmlFluid { 
 private:

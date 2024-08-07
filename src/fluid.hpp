@@ -19,8 +19,8 @@ const int NCOLS = 25;
 
 class FluidParameters { 
 public: 
-  const float collisionDamping = .0f;
-  const float smoothingRadius = .04; //.08
+  const float collisionDamping = .5f;
+  const float smoothingRadius = .08; //.08
   const float particleMass = 1.f;
   const bool isGravity = false;
   const float targetDensity = 5.;
@@ -28,8 +28,8 @@ public:
   const float nearPressureMultiplier = 0.01f;
   const float smoothingVolume = 2 * M_PI * smoothingRadius / 3.0;
   const float smoothingNearVolume = 2 * M_PI * smoothingRadius / 3.0;
-  const float viscosityBeta = 0.9; // non-zero for viscos fluids
-  const float viscosityDelta = .0f;
+  const float viscosityBeta = 0.0; // non-zero for viscos fluids
+  const float viscosityDelta = .5f;
   FluidParameters() = default;
 };
 

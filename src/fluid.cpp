@@ -49,7 +49,7 @@ float Fluid::smoothingNearKernel(const float dist) const
 float Fluid::computeNearDensity(const Particle &p) const
 {
   float density = 0.f;
-  for (const auto &j : particles)
+  for (const auto &j : grid.adj(p))
   {
     if (&j != &p)
     {

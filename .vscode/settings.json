@@ -1,4 +1,21 @@
 {
+  
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.generator": "Unix Makefiles",
+    "cmake.configureOnOpen": true,
+    "cmake.configureArgs": [
+        "-DCMAKE_BUILD_TYPE=Debug"
+    ],
+    "cmake.buildToolsArgs": [
+        "-j4"
+    ],
+    "cmake.parallelJobs": 4,
+    "cmake.debugConfig": {
+        "cwd": "${workspaceFolder}/build/src",
+        "args": []
+    },
+
   "cSpell.words": [
     "boundry",
     "gridify",

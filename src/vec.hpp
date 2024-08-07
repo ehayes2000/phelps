@@ -8,17 +8,12 @@ public:
   float y;
   Vec(): x(0), y(0){}
   Vec(float x, float y):x(x), y(y){}
-  
   Vec(const Vec& o){ 
     x = o.x;
     y = o.y;
   }
-  
-  Vec& operator=(const Vec& v) { 
-    x=v.x;
-    y=v.y;
-    return *this;
-  }
+  Vec(Vec&&)noexcept=default;
+  Vec& operator=(const Vec&)noexcept=default;
 
   Vec operator/(const float& s) const { 
     return Vec( 
