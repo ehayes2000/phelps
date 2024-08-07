@@ -4,6 +4,7 @@
 #include "particle.hpp"
 #include "gridView.hpp"
 #include "adjacentParticles.hpp"
+#include "fluidParams.hpp"
 
 #include <numeric>
 #include <cmath>
@@ -13,48 +14,20 @@
 #include <map>
 
 
- 
-const float GRAVITY = 1.f;
-const int NCOLS = 25;
-
-class FluidParameters { 
-public: 
-  const float collisionDamping = .5f;
-  const float smoothingRadius = .08; //.08
-  const float particleMass = 1.f;
-  const bool isGravity = false;
-  const float targetDensity = 5.;
-  const float pressureMultiplier = 0.0005f;
-  const float nearPressureMultiplier = 0.01f;
-  const float smoothingVolume = 2 * M_PI * smoothingRadius / 3.0;
-  const float smoothingNearVolume = 2 * M_PI * smoothingRadius / 3.0;
-  const float viscosityBeta = 0.0; // non-zero for viscos fluids
-  const float viscosityDelta = .5f;
-  FluidParameters() = default;
-};
-
-
 class Fluid { 
 public:
   using Particles = std::vector<Particle>;
 public:
-  const float radius;
-  FluidParameters params;
-  Fluid(int width, 
-        int height, 
-        int nParticles, 
-        float radius): 
-    particles(nParticles), 
-    scale(std::max(width, height)),
-    boundSize(static_cast<float>(width)/static_cast<float>(std::max(width, height)),
-      static_cast<float>(height)/ static_cast<float>(std::max(width, height))),
+  FluidParameters &params;
+  Fluid(FluidParameters &params):
+    scale(std::max(params.renderHeight, params.renderWidth)), 
+    params(params),
+    boundSize(params.renderWidth / scale, params.renderHeight / scale),
     grid(boundSize, params.smoothingRadius),
-    renderHeight(height),
-    renderWidth(width),
-    radius(radius)
+    particles(params.nParticles)
   {
     // randomInit(nParticles);
-    gridInit(NCOLS, .04);
+    gridInit(25, .04);
   }
   void step(float deltaTime);
   void applyForce(Vec &p, float force, float radius);
@@ -77,12 +50,12 @@ public:
       simulation to render space
     */
     return Vec(
-      scale * (p.x - radius),
-      scale * (boundSize.y - p.y - radius)
+      scale * (p.x - params.renderRadius),
+      scale * (boundSize.y - p.y - params.renderRadius) // 720 * (.666666 - .661 - .005)
     );
   }
 
-  float computeAvgDensity(){
+  float computeAvgDensity() const {
     float totalDensity = 0.0f;
     for (auto &p: particles){ 
       totalDensity += computeDensity(p);
@@ -90,12 +63,10 @@ public:
     return totalDensity / particles.size();
   }
 private:
+  float scale;
   Particles particles;
   Vec boundSize;
   GridView grid;
-  int renderHeight;
-  int renderWidth;
-  float scale;
 
   float smoothingKernel(const float dist) const;
   float smoothingNearKernel(const float dist) const;

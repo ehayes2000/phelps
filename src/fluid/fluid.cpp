@@ -6,12 +6,9 @@ void Fluid::step(float deltaTime)
   grid.gridify(particles);
   if (deltaTime <= 0.f)
     return;
-  if (params.isGravity)
-  {
     for (auto &p : particles)
-    {
-      p.velocity += Vec(0.f, -deltaTime * GRAVITY);
-    }
+  {
+    p.velocity += Vec(0.f, -deltaTime * params.gravity);
   }
   applyViscosity(deltaTime);
   for (auto &p : particles)
@@ -146,8 +143,8 @@ void Fluid::applyForce(Vec &p, float force, float radius)
 
 void Fluid::boundryCollision(Particle &a)
 {
-  Vec minBound = Vec(0, 0) + Vec(radius, radius);
-  Vec maxBound = boundSize - Vec(radius, radius);
+  Vec minBound = Vec(0, 0) + Vec(params.renderRadius, params.renderRadius);
+  Vec maxBound = boundSize - Vec(params.renderRadius, params.renderRadius);
   // X-axis collision
   if (a.position.x < minBound.x)
   {
@@ -191,7 +188,6 @@ void Fluid::gridInit(int cols, float gap)
   int n = particles.size();
   int nRows = std::ceil(static_cast<float>(n) / static_cast<float>(cols));
   float ySpace = (nRows - 1) * gap;
-
   const float xStart = (boundSize.x / 2) - (xSpace / 2);
   float x = xStart;
   float y = (boundSize.y / 2) + (ySpace / 2);
@@ -242,7 +238,7 @@ void Fluid::computeDensityGrid(std::vector<std::vector<float>> &grid) const
     {
       for (int col = px.x - pxRadius; col <= px.x + pxRadius; col++)
       {
-        if (row < 0 || row >= renderHeight || col < 0 || col >= renderWidth)
+        if (row < 0 || row >= params.renderHeight || col < 0 || col >= params.renderWidth)
         {
           continue;
         }

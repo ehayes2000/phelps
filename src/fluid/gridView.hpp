@@ -10,7 +10,7 @@ public:
   using Particles = std::vector<Particle>;
   using ParticlesView = std::vector<Particle*>;
 public:
-  GridView(const Vec &boundSize, float smoothingRadius): 
+  GridView(Vec &boundSize, float &smoothingRadius): 
     grid(boundSize, smoothingRadius)
     {}
   void gridify(Particles &ps) { grid.gridify(ps); }

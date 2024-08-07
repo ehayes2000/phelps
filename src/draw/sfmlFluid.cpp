@@ -1,50 +1,27 @@
 #include "sfmlFluid.hpp"
+#include "imgui.h"
+#include "imgui-SFML.h"
 #include <algorithm>
 
-sf::CircleShape *SfmlFluid::makeDrawable(const Particle &p)
+sf::CircleShape SfmlFluid::makeDrawable(const Particle &p) const
 {
-  sf::CircleShape *c = new sf::CircleShape(fluid.radius * fluid.getScale());
+  sf::CircleShape c = sf::CircleShape(fluid.params.renderRadius * fluid.getScale());
   Vec rCords = fluid.stor(p.position);
-  c->setPosition(rCords.x, rCords.y);
-  c->setFillColor(sf::Color::Blue);
+  float speed = p.velocity.mag();
+  sf::Color color = plasmaGradient(speed, 0, .3f); // TODO figure out a real upper bound
+  c.setPosition(rCords.x, rCords.y);
+  c.setFillColor(color);
   return c;
 }
 
-std::vector<sf::CircleShape *> &SfmlFluid::makeDrawables()
-{
-  this->drawables.clear();
-  this->drawables.reserve(this->fluid.getParticles().size());
-  for (const auto &i : fluid.getParticles())
-  {
-    drawables.push_back(makeDrawable(i));
+
+void SfmlFluid::drawParticles() 
+{  
+  const auto &particles = fluid.getParticles();
+  for (const auto &p: particles){
+    const auto drawable = makeDrawable(p);
+    window.draw(drawable);
   }
-  return drawables;
-}
-
-void SfmlFluid::updateDrawables()
-{
-  for (int i = 0; i < fluid.getParticles().size(); i++)
-  {
-    Vec rCords = fluid.stor(fluid.getParticles()[i].position);
-    float speed = fluid.getParticles()[i].velocity.mag();
-    sf::Color c = plasmaGradient(speed, 0, .3f);
-    drawables[i]->setFillColor(c);
-    drawables[i]->setPosition(
-        rCords.x,
-        rCords.y);
-  }
-}
-void SfmlFluid::renderParticles() { 
- window.clear(sf::Color::White);
-
-    // Draw the circle
-    for (const auto &d : drawables)
-    {
-      window.draw(*d);
-    }
-
-    // Display the contents of the window
-    window.display();
 }
 
 sf::Color getPressureColor(float pressure) {
@@ -59,81 +36,94 @@ sf::Color getPressureColor(float pressure) {
     return sf::Color(r, g, b);
 }
 
+void SfmlFluid::handleSfEvent(sf::Event &event) 
+{ 
+  ImGui::SFML::ProcessEvent(event);
+  if (event.type == sf::Event::Closed)
+  {
+    window.close();
+  }
+  if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape){
+    params.isDebugMenu = !params.isDebugMenu;
+  }
+  if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+  {
+    params.isPaused = !params.isPaused;
+  }
+  if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left)
+  {
+    params.isLClick = true;
+  }
+  if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left){
+    params.isLClick = false;
+  }
+  if (params.isLClick){
+    sf::Vector2i mPos = sf::Mouse::getPosition(window);
+    Vec simPoint = fluid.rtos(Vec(mPos.x, mPos.y));
+    fluid.applyForce(simPoint, .2, 0.2f);
+  }
+}
+
+const sf::Sprite SfmlFluid::getDensityImage() const { 
+  std::vector<std::vector<float>> densityGrid(height, std::vector<float>(width, 0.0f));
+  for (auto &v: densityGrid){
+    for (int i = 0; i < v.size(); i++){
+      v[i] = 0.f;
+    }
+  }
+  fluid.computeDensityGrid(densityGrid);
+  std::cout << "Avg Density: " << fluid.computeAvgDensity() << std::endl;
+  sf::Image image;
+  image.create(width, height);
+  for (int y = 0; y < height; y++){
+    for (int x = 0; x < width; x++){
+      sf::Color c = getPressureColor(densityGrid[y][x]);
+      image.setPixel(x, y, c);
+    }
+  }
+  sf::Texture texture;
+  texture.loadFromImage(image);
+  sf::Sprite sprite(texture);
+  return sprite;
+}
+
 void SfmlFluid::startRenderLoop()
 {
-
-  // Create a window with a resolution of 800x600 pixels and a title "SFML Circle"
-
-  // Main loop that continues until the window is closed
   sf::Clock clock;
-  float deltaTime = 0.0f;
-  bool isPaused = true;
-  bool isLClick = false;
-  std::vector<std::vector<float>> densityGrid(height, std::vector<float>(width, 0.0f));
+  sf::Time dt = clock.restart();
+  window.setFramerateLimit(60);
+  ImGui::SFML::Init(window);
   while (window.isOpen())
   {
+    window.clear();
     // Process events
     sf::Event event;
     while (window.pollEvent(event))
     {
-      if (event.type == sf::Event::Closed)
-      {
-        window.close();
-      }
-      if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
-      {
-        for (auto &v: densityGrid){
-          for (int i = 0; i < v.size(); i++){
-            v[i] = 0.f;
-          }
-        }
-        fluid.computeDensityGrid(densityGrid);
-        isPaused = !isPaused;
-        deltaTime = clock.restart().asSeconds();
-        std::cout << "avg density: " << fluid.computeAvgDensity() << std::endl;
-
-        sf::Image image;
-        image.create(width, height);
-        for (int y = 0; y < height; y++){
-          for (int x = 0; x < width; x++){
-            sf::Color c = getPressureColor(densityGrid[y][x]);
-            image.setPixel(x, y, c);
-          }
-        }
-        
-        sf::Texture texture;
-        texture.loadFromImage(image);
-        sf::Sprite sprite(texture);
-        window.draw(sprite);
-        window.display();
-
-      }
-      if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left)
-      {
-        isLClick = true;
-        Vec simPoint = fluid.rtos(Vec(event.mouseButton.x, event.mouseButton.y));
-        fluid.applyForce(simPoint, .2, 0.2f);
-      }
-      else if (event.type == sf::Event::MouseButtonReleased)
-      {
-        isLClick = false;
-      }
-      else if (sf::Event::MouseMoved && isLClick)
-      {
-        sf::Vector2i mPos = sf::Mouse::getPosition(window);
-        Vec simPoint = fluid.rtos(Vec(mPos.x, mPos.y));
-        fluid.applyForce(simPoint, .2f, 0.2f);
-      }
+      handleSfEvent(event);
     }
-    if (isPaused)
-      continue;
-    // Clear the window with black color
-    deltaTime = clock.restart().asSeconds();
-    fluid.step(deltaTime);
-    updateDrawables();
-    renderParticles();
-   
+    if (params.isPaused){
+      ;
+    }
+    else if (params.isDebugMenu) { 
+      dt = clock.restart();
+      ImGui::SFML::Update(window, dt);
+      ImGui::ShowDemoWindow();
+      window.clear();
+      ImGui::SFML::Render(window);
+      window.display();
+    }
+    else if (params.isDensityView){
+      window.draw(getDensityImage());
+    } 
+    else { 
+      fluid.step(dt.asSeconds());
+      drawParticles();
+    }
+    dt = clock.restart();
+    window.display();
   }
+  ImGui::SFML::Shutdown();
 }
 
 sf::Color SfmlFluid::plasmaGradient(float value, float minValue, float maxValue) const {
@@ -204,6 +194,5 @@ sf::Color SfmlFluid::plasmaGradient(float value, float minValue, float maxValue)
             color6.b + (color7.b - color6.b) * alpha
         );
     }
-
     return result;
 }

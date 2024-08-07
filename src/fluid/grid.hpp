@@ -9,7 +9,7 @@ public:
   using Particles = std::vector<Particle>;
   using ParticlesView = std::vector<Particle*>;
 public:
-  Grid(const Vec &boundSize, float cellSize): 
+  Grid(Vec &boundSize, float &cellSize): 
     cellSize(cellSize),
     nCells((boundSize.x / cellSize) * (boundSize.y / cellSize)),
     adjacentOffsets{

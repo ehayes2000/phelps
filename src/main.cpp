@@ -1,8 +1,8 @@
-#include "sfmlFluid.hpp"
+#include "draw/sfmlFluid.hpp"
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    SfmlFluid fluid(720, 480);
+    SfmlFluid fluid(FluidParameters{.renderWidth=720, .renderHeight=480});
     fluid.startRenderLoop();
     return 0;
 }
