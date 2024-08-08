@@ -57,7 +57,7 @@ void SfmlFluid::handleSfEvent(sf::Event &event)
   if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left){
     params.isLClick = false;
   }
-  if (params.isLClick){
+  if (params.isLClick && !params.isPaused && !params.isDebugMenu){
     sf::Vector2i mPos = sf::Mouse::getPosition(window);
     Vec simPoint = fluid.rtos(Vec(mPos.x, mPos.y));
     fluid.applyForce(simPoint, .2, 0.2f);
@@ -93,33 +93,44 @@ void SfmlFluid::startRenderLoop()
   sf::Time dt = clock.restart();
   window.setFramerateLimit(60);
   ImGui::SFML::Init(window);
+  float imGuiScale = 2.0; // TODO dynamic dpi scale
+  ImGui::GetIO().FontGlobalScale = imGuiScale;
   while (window.isOpen())
   {
-    window.clear();
     // Process events
     sf::Event event;
     while (window.pollEvent(event))
     {
       handleSfEvent(event);
     }
-    if (params.isPaused){
-      ;
-    }
-    else if (params.isDebugMenu) { 
-      dt = clock.restart();
+    if (params.isDebugMenu) { 
       ImGui::SFML::Update(window, dt);
       ImGui::ShowDemoWindow();
       window.clear();
+      drawParticles();
       ImGui::SFML::Render(window);
-      window.display();
     }
-    else if (params.isDensityView){
+    else if (params.isDensityView && params.isPaused){
+      window.clear();
       window.draw(getDensityImage());
     } 
-    else { 
+    else if (params.isDensityView){
+      window.clear();
+      fluid.step(dt.asSeconds());
+      drawParticles(); 
+      window.draw(getDensityImage());
+    }
+    else if (!params.isPaused) { 
+      window.clear();
       fluid.step(dt.asSeconds());
       drawParticles();
     }
+    else { 
+      window.clear();
+      drawParticles();
+    }
+
+
     dt = clock.restart();
     window.display();
   }

@@ -10,4 +10,4 @@ CPackConfig.cmake
 CPackSourceConfig.cmake
 phelp
 traces
-
+dependencies

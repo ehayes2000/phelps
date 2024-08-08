@@ -13,7 +13,7 @@ struct FluidParameters {
   float viscosityBeta = 0.0; // non-zero for viscos fluids
   float viscosityDelta = .5f;
   float gravity = 1.f;
-  int renderHeight = 480;
-  int renderWidth = 720;
+  int renderHeight = 720;
+  int renderWidth = 1080;
   int nParticles = 100;
 };

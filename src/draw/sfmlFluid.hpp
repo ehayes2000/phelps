@@ -18,8 +18,7 @@ public:
     height(params.renderHeight),
     width(params.renderWidth),
     fluidParams(params)
-  {
-  }
+  {}
   ~SfmlFluid()=default;
   void startRenderLoop();
 private:
