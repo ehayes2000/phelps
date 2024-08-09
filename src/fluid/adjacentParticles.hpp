@@ -55,13 +55,15 @@ public:
     void next();
     void init();
     const ParticlesView* getCollection() const;
+    const ParticlesView* currentCollection; 
   };
 
 public:
   AdjacentParticles(const Vec &point, const Grid &grid): 
     point(point), 
     grid(grid)
-  {}
+  {
+  }
     
   iterator begin() { 
     return iterator(*this, 0, 0);

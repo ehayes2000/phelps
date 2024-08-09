@@ -7,26 +7,25 @@
 class SfmlFluid { 
 public:
   SfmlFluid(FluidParameters params):
-    window(sf::VideoMode(params.renderWidth, params.renderHeight), "Phelps"),
-    fluid(params),
-    height(params.renderHeight),
-    width(params.renderWidth),
-    fluidParams(params)
+    fluidParams(params),
+    window(sf::VideoMode(fluidParams.renderWidth, fluidParams.renderHeight), "Phelps"),
+    fluid(fluidParams),
+    height(fluidParams.renderHeight),
+    width(fluidParams.renderWidth)
   {}
   ~SfmlFluid()=default;
   void startRenderLoop();
 private:
+  FluidParameters fluidParams;
+  RenderParameters params;
   Fluid fluid;
   int height;
   int width;
   sf::RenderWindow window;
-  FluidParameters &fluidParams;
-  RenderParameters params;
   const sf::Sprite getDensityImage() const;
   sf::CircleShape makeDrawable(const Particle &p) const ;
   sf::Color plasmaGradient(float value, float minVal, float maxVal) const;
   void handleSfEvent(sf::Event&);
   void drawParticles();
   void highlightAdjacentParticles();
-
 };

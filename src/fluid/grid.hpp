@@ -3,6 +3,7 @@
 #include "particle.hpp"
 #include <vector>
 #include <map>
+#include <iostream>
 
 class Grid { 
 public:
@@ -17,14 +18,15 @@ public:
       Vec(-1, 0) * cellSize,  Vec(0, 0) * cellSize,  Vec(1, 0) * cellSize,
       Vec(-1, 1) * cellSize,  Vec(0, 1) * cellSize,  Vec(1, 1) * cellSize
       }
-  {}
+  {
+  }
   const ParticlesView* viewCell(const Vec &) const;
   void gridify(Particles &);
   static const unsigned short ADJACENT_CELLS = 9;
   const Vec adjacentOffsets[ADJACENT_CELLS];
+  const float cellSize;
+  const int nCells;
+  int hashCell(const Vec &) const;
 private: 
   std::unordered_map<int, ParticlesView> cells;
-  int nCells;
-  float cellSize;
-  int hashCell(const Vec &) const;
 };

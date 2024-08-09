@@ -14,6 +14,11 @@ public:
     grid(boundSize, smoothingRadius)
     {}
   void gridify(Particles &ps) { grid.gridify(ps); }
+
+  const ParticlesView *cellCollection(const Vec &p) const {
+    return grid.viewCell(p);
+  }
+
   AdjacentParticles adj(const Particle &p) const { 
     return AdjacentParticles(p.position, grid);
   }
@@ -23,5 +28,3 @@ public:
 private:
   Grid grid;
 };
-
-

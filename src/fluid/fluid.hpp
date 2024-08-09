@@ -20,7 +20,6 @@ public:
 public:
   const GridView& getGrid() const { return grid; }
   FluidParameters &params;  
-  const GridView::ParticlesView& getAdjacentParticles(const Vec);
   Fluid(FluidParameters &params):
     scale(std::max(params.renderHeight, params.renderWidth)), 
     params(params),

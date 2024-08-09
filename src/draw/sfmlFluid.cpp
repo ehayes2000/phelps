@@ -92,8 +92,8 @@ void SfmlFluid::startRenderLoop()
   sf::Time dt = clock.restart();
   window.setFramerateLimit(60);
   ImGui::SFML::Init(window);
-  float imGuiScale = 2.0; // TODO dynamic dpi scale
-  ImGui::GetIO().FontGlobalScale = imGuiScale;
+  ImGui::GetIO().FontGlobalScale = params.guiScale;
+  fluid.step(dt.asSeconds());
   while (window.isOpen())
   {
     // Process events
@@ -106,6 +106,10 @@ void SfmlFluid::startRenderLoop()
     if (params.isDensityView){
       window.draw(getDensityImage());
     }
+    else if (params.isAdjacentView){
+      drawParticles();
+      highlightAdjacentParticles();
+    }
     else { 
       drawParticles();
     }
@@ -113,9 +117,6 @@ void SfmlFluid::startRenderLoop()
       ImGui::SFML::Update(window, dt);
       ShowUi(params, fluidParams);
       ImGui::SFML::Render(window);
-    }
-    else if (params.isAdjacentView){
-      highlightAdjacentParticles();
     }
     else if (!params.isPaused){
       fluid.step(dt.asSeconds());
@@ -201,7 +202,7 @@ void SfmlFluid::highlightAdjacentParticles(){
   const GridView& grid = fluid.getGrid();
   sf::Vector2i mPos = sf::Mouse::getPosition(window);
   Vec simPos = fluid.rtos(Vec(mPos.x, mPos.y));
-  for (const auto &p : grid.adj(simPos)){ 
+  for (const auto &p: grid.adj(simPos)) { 
     sf::CircleShape c = sf::CircleShape(fluid.params.renderRadius * fluid.getScale());
     Vec rCords = fluid.stor(p.position);
     c.setPosition(rCords.x, rCords.y);

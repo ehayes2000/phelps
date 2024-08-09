@@ -83,6 +83,7 @@
     "filesystem": "cpp",
     "iterator": "cpp",
     "list": "cpp",
-    "ranges": "cpp"
+    "ranges": "cpp",
+    "memory_resource": "cpp"
   }
 }
