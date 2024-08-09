@@ -17,6 +17,9 @@ public:
   AdjacentParticles adj(const Particle &p) const { 
     return AdjacentParticles(p.position, grid);
   }
+  AdjacentParticles adj(const Vec &p) const { 
+    return AdjacentParticles(p, grid);
+  }
 private:
   Grid grid;
 };

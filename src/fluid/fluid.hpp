@@ -18,7 +18,9 @@ class Fluid {
 public:
   using Particles = std::vector<Particle>;
 public:
-  FluidParameters &params;
+  const GridView& getGrid() const { return grid; }
+  FluidParameters &params;  
+  const GridView::ParticlesView& getAdjacentParticles(const Vec);
   Fluid(FluidParameters &params):
     scale(std::max(params.renderHeight, params.renderWidth)), 
     params(params),

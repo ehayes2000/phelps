@@ -1,14 +1,8 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+#include "renderParams.hpp"
 #include "../fluid/fluid.hpp"
+#include <SFML/Graphics.hpp>
 
-struct SfParams { 
-  bool isPaused = false;
-  bool isDebugMenu = false;
-  bool isDensityView = false;
-  bool isLClick = false;
-  bool isRClick = false;
-};
 
 class SfmlFluid { 
 public:
@@ -26,12 +20,13 @@ private:
   int height;
   int width;
   sf::RenderWindow window;
-  FluidParameters fluidParams;
-  SfParams params;
+  FluidParameters &fluidParams;
+  RenderParameters params;
   const sf::Sprite getDensityImage() const;
   sf::CircleShape makeDrawable(const Particle &p) const ;
   sf::Color plasmaGradient(float value, float minVal, float maxVal) const;
   void handleSfEvent(sf::Event&);
   void drawParticles();
+  void highlightAdjacentParticles();
 
 };

@@ -1,4 +1,5 @@
 #include "sfmlFluid.hpp"
+#include "ui.hpp"
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include <algorithm>
@@ -14,7 +15,6 @@ sf::CircleShape SfmlFluid::makeDrawable(const Particle &p) const
   return c;
 }
 
-
 void SfmlFluid::drawParticles() 
 {  
   const auto &particles = fluid.getParticles();
@@ -28,7 +28,6 @@ sf::Color getPressureColor(float pressure) {
     // Convert pressure to a value between 0 and 1
     float t = (pressure + 1.0f) / 2.0f;
      
-    // Calculate RGB values
     int r = static_cast<int>(std::min(255.0f, 510.0f * t));
     int b = static_cast<int>(std::min(255.0f, 510.0f * (1.0f - t)));
     int g = 255 - std::abs(r - b);
@@ -103,34 +102,24 @@ void SfmlFluid::startRenderLoop()
     {
       handleSfEvent(event);
     }
-    if (params.isDebugMenu) { 
-      ImGui::SFML::Update(window, dt);
-      ImGui::ShowDemoWindow();
-      window.clear();
-      drawParticles();
-      ImGui::SFML::Render(window);
-    }
-    else if (params.isDensityView && params.isPaused){
-      window.clear();
+    window.clear();
+    if (params.isDensityView){
       window.draw(getDensityImage());
-    } 
-    else if (params.isDensityView){
-      window.clear();
-      fluid.step(dt.asSeconds());
-      drawParticles(); 
-      window.draw(getDensityImage());
-    }
-    else if (!params.isPaused) { 
-      window.clear();
-      fluid.step(dt.asSeconds());
-      drawParticles();
     }
     else { 
-      window.clear();
       drawParticles();
     }
-
-
+    if (params.isDebugMenu) { 
+      ImGui::SFML::Update(window, dt);
+      ShowUi(params, fluidParams);
+      ImGui::SFML::Render(window);
+    }
+    else if (params.isAdjacentView){
+      highlightAdjacentParticles();
+    }
+    else if (!params.isPaused){
+      fluid.step(dt.asSeconds());
+    }
     dt = clock.restart();
     window.display();
   }
@@ -207,3 +196,16 @@ sf::Color SfmlFluid::plasmaGradient(float value, float minValue, float maxValue)
     }
     return result;
 }
+
+void SfmlFluid::highlightAdjacentParticles(){   
+  const GridView& grid = fluid.getGrid();
+  sf::Vector2i mPos = sf::Mouse::getPosition(window);
+  Vec simPos = fluid.rtos(Vec(mPos.x, mPos.y));
+  for (const auto &p : grid.adj(simPos)){ 
+    sf::CircleShape c = sf::CircleShape(fluid.params.renderRadius * fluid.getScale());
+    Vec rCords = fluid.stor(p.position);
+    c.setPosition(rCords.x, rCords.y);
+    c.setFillColor(sf::Color::Green);
+    window.draw(c);
+  }
+} 
