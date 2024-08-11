@@ -4,11 +4,12 @@
 #include "imgui-SFML.h"
 #include <algorithm>
 
-sf::CircleShape SfmlFluid::makeDrawable(const Particle &p) const
+sf::CircleShape SfmlFluid::makeDrawable(const int i) const
 {
   sf::CircleShape c = sf::CircleShape(fluid.params.renderRadius * fluid.getScale());
-  Vec rCords = fluid.stor(p.position);
-  float speed = p.velocity.mag();
+  const Particles& particles = fluid.getParticles(); 
+  Vec rCords = fluid.stor(particles.positions[i]);
+  float speed = particles.velocities[i].mag();
   sf::Color color = plasmaGradient(speed, 0, .3f); // TODO figure out a real upper bound
   c.setPosition(rCords.x, rCords.y);
   c.setFillColor(color);
@@ -18,8 +19,8 @@ sf::CircleShape SfmlFluid::makeDrawable(const Particle &p) const
 void SfmlFluid::drawParticles() 
 {  
   const auto &particles = fluid.getParticles();
-  for (const auto &p: particles){
-    const auto drawable = makeDrawable(p);
+  for (int i = 0; i < fluid.getParticles().size; ++i){
+    const auto drawable = makeDrawable(i);
     window.draw(drawable);
   }
 }
@@ -202,9 +203,10 @@ void SfmlFluid::highlightAdjacentParticles(){
   const GridView& grid = fluid.getGrid();
   sf::Vector2i mPos = sf::Mouse::getPosition(window);
   Vec simPos = fluid.rtos(Vec(mPos.x, mPos.y));
-  for (const auto &p: grid.adj(simPos)) { 
+  const Particles& particles = fluid.getParticles();
+  for (const auto p: grid.adj(simPos)) { 
     sf::CircleShape c = sf::CircleShape(fluid.params.renderRadius * fluid.getScale());
-    Vec rCords = fluid.stor(p.position);
+    Vec rCords = fluid.stor(particles.positions[p]);
     c.setPosition(rCords.x, rCords.y);
     c.setFillColor(sf::Color::Green);
     window.draw(c);

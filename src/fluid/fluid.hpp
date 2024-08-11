@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vec.hpp"
-#include "particle.hpp"
+#include "particles.hpp"
 #include "gridView.hpp"
 #include "adjacentParticles.hpp"
 #include "fluidParams.hpp"
@@ -15,8 +15,6 @@
 
 
 class Fluid { 
-public:
-  using Particles = std::vector<Particle>;
 public:
   const GridView& getGrid() const { return grid; }
   FluidParameters &params;  
@@ -34,7 +32,7 @@ public:
   void applyForce(Vec &p, float force, float radius);
   void computeDensityGrid(std::vector<std::vector<float>> &) const;
   float getScale() const { return scale; }
-  const std::vector<Particle>& getParticles() const { return particles; }
+  const Particles& getParticles() const { return particles; }
 
   Vec rtos(const Vec& p) const { 
     /*
@@ -58,10 +56,10 @@ public:
 
   float computeAvgDensity() const {
     float totalDensity = 0.0f;
-    for (auto &p: particles){ 
-      totalDensity += computeDensity(p);
+    for (int i = 0; i < particles.size; ++i){
+      totalDensity += computeDensity(particles.positions[i]);
     }
-    return totalDensity / particles.size();
+    return totalDensity / particles.size;
   }
 private:
   float scale;
@@ -71,17 +69,17 @@ private:
 
   float smoothingKernel(const float dist) const;
   float smoothingNearKernel(const float dist) const;
-  float computeNearDensity(const Particle &p) const;
-  float computeDensity(const Particle &p) const;
+  float computeNearDensity(const Vec &) const;
+  float computeDensity(const Vec &) const;
   float computeNearPseudoPressure(const float) const;
   float computePseudoPressure(const float) const;
   void gridInit(int cols, float gap);
   void randomInit(int n);
-  void boundryCollision(Particle &a);
+  void boundryCollision(const int);
   void normalizeDensityGrid(std::vector<std::vector<float>>&) const;
   Vec relaxationDisplacement(
-    const Particle &, 
-    const Particle &,
+    const int i, 
+    const int j,
     const float deltaTime,
     const float pressure,
     const float nearPressure) const;

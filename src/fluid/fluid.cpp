@@ -3,24 +3,25 @@
 
 void Fluid::step(float deltaTime)
 {
+  std::cout << params.smoothingKernelVolume << std::endl;
   grid.gridify(particles);
   if (deltaTime <= 0.f)
     return;
-    for (auto &p : particles)
+  for (auto &v : particles.velocities)
   {
-    p.velocity += Vec(0.f, -deltaTime * params.gravity);
+    v += Vec(0.f, -deltaTime * params.gravity);
   }
   applyViscosity(deltaTime);
-  for (auto &p : particles)
+  for (int i = 0; i < particles.size; ++ i)
   {
-    p.positionPrev = p.position;
-    p.position += deltaTime * p.velocity;
+    particles.prevPositions[i] = particles.positions[i];
+    particles.positions[i] += deltaTime * particles.velocities[i];
   }
   doubleDensityRelaxation(deltaTime);
-  for (auto &p : particles)
+  for (int i = 0; i < particles.size; ++i)
   {
-    p.velocity = (p.position - p.positionPrev) / deltaTime;
-    boundryCollision(p);
+    particles.velocities[i] = (particles.positions[i] - particles.prevPositions[i]) / deltaTime;
+    boundryCollision(i);
   }
 }
 
@@ -43,14 +44,13 @@ float Fluid::smoothingNearKernel(const float dist) const
   return nearKernel(dist, params.smoothingRadius);
 }
 
-float Fluid::computeNearDensity(const Particle &p) const
+float Fluid::computeNearDensity(const Vec &p) const
 {
   float density = 0.f;
   for (const auto &j : grid.adj(p))
   {
-    if (&j != &p)
-    {
-      float dist = (p.position - j.position).mag();
+    float dist = (p - particles.positions[j]).mag();
+    if (dist > 0) {
       density += smoothingNearKernel(dist);
     }
   }
@@ -62,18 +62,19 @@ float Fluid::smoothingKernel(const float dist) const
   return kernel(dist, params.smoothingRadius);
 }
 
-float Fluid::computeDensity(const Particle &p) const
+// TODO adjacent index!
+float Fluid::computeDensity(const Vec &p) const
 {
   float density = 0.f;
   for (const auto &j : grid.adj(p))
   {
-    if (&j != &p)
+    float dist = (p - particles.positions[j]).mag();
+    if (dist > 0) 
     {
-      float dist = (p.position - j.position).mag();
       density += smoothingKernel(dist);
     }
   }
-  return density;
+  return density / params.smoothingKernelVolume;
 }
 
 inline float Fluid::computeNearPseudoPressure(const float nearDensity) const
@@ -86,13 +87,13 @@ inline float Fluid::computePseudoPressure(const float density) const
   return params.pressureMultiplier * (density - params.targetDensity);
 }
 
-Vec Fluid::relaxationDisplacement(const Particle &i,
-                                  const Particle &j,
+Vec Fluid::relaxationDisplacement(const int i,
+                                  const int j,
                                   const float deltaTime,
                                   const float pressure,
                                   const float nearPressure) const
 {
-  Vec rij = i.position - j.position;
+  Vec rij = particles.positions[i] - particles.positions[j];
   if (rij.mag() == 0.f)
   {
     return Vec(0, 0);
@@ -104,68 +105,68 @@ Vec Fluid::relaxationDisplacement(const Particle &i,
 
 void Fluid::doubleDensityRelaxation(float deltaTime)
 {
-  for (auto &i : particles)
+  for (int i = 0; i < particles.size; i ++)
   {
-    Vec predicted = i.position + deltaTime * i.velocity;
-    float density = computeDensity(i);
+    Vec predicted = particles.positions[i] + deltaTime * particles.velocities[i];
+    float density = computeDensity(particles.positions[i]);
     float pressure = computePseudoPressure(density);
-    float nearDensity = computeNearDensity(i);
+    float nearDensity = computeNearDensity(particles.positions[i]);
     float nearPressure = computeNearPseudoPressure(nearDensity);
     Vec dx(0, 0);
-    for (auto &j : grid.adj(i))
+    for (const auto &j : grid.adj(particles.positions[i]))
     {
-      float q = (i.position - j.position).mag() / params.smoothingRadius;
-      if (&j != &i && q < 1.f)
+      float q = (particles.positions[i] - particles.positions[j]).mag() / params.smoothingRadius;
+      if(q > 0 && q < 1.f)
       {
         Vec displacement = relaxationDisplacement(i, j, deltaTime, pressure, nearPressure);
-        j.position -= displacement / 2.f;
+        particles.positions[j] -= displacement / 2.f;
         dx += displacement / 2.f;
       }
     }
-    i.position += dx;
+    particles.positions[i] += dx;
   }
 }
 
 void Fluid::applyForce(Vec &p, float force, float radius)
 {
-  for (auto &particle : particles)
-  {
-    Vec offset = particle.position - p;
+  for (auto i: grid.adj(p)) { 
+    Vec offset = particles.positions[i] - p;
     float dist = offset.mag();
-    if (dist < radius)
-    {
+    if (dist > 0) { 
       float influence = kernel(dist, radius);
       Vec forceVec = (offset / dist) * influence * force;
-      particle.velocity += forceVec;
+      particles.velocities[i] += forceVec;
     }
   }
 }
 
-void Fluid::boundryCollision(Particle &a)
+void Fluid::boundryCollision(const int i)
 {
   Vec minBound = Vec(0, 0) + Vec(params.renderRadius, params.renderRadius);
   Vec maxBound = boundSize - Vec(params.renderRadius, params.renderRadius);
   // X-axis collision
-  if (a.position.x < minBound.x)
+  Vec &pos = particles.positions[i];
+  Vec &vel = particles.velocities[i];
+  if (pos.x < minBound.x)
   {
-    a.position.x = minBound.x;
-    a.velocity.x = -a.velocity.x * params.collisionDamping;
+    pos.x = minBound.x;
+    vel.x = -vel.x * params.collisionDamping;
   }
-  else if (a.position.x > maxBound.x)
+  else if (pos.x > maxBound.x)
   {
-    a.position.x = maxBound.x;
-    a.velocity.x = -a.velocity.x * params.collisionDamping;
+    pos.x = maxBound.x;
+    vel.x = -vel.x * params.collisionDamping;
   }
   // Y-axis collision
-  if (a.position.y < minBound.y)
+  if (pos.y < minBound.y)
   {
-    a.position.y = minBound.y;
-    a.velocity.y = -a.velocity.y * params.collisionDamping;
+    pos.y = minBound.y;
+    vel.y = -vel.y * params.collisionDamping;
   }
-  else if (a.position.y > maxBound.y)
+  else if (pos.y > maxBound.y)
   {
-    a.position.y = maxBound.y;
-    a.velocity.y = -a.velocity.y * params.collisionDamping;
+    pos.y = maxBound.y;
+    vel.y = -vel.y * params.collisionDamping;
   }
 }
 
@@ -176,16 +177,16 @@ void Fluid::randomInit(int n)
   {
     float x = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * boundSize.x;
     float y = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * boundSize.y;
-    particles[i] =
-        Particle(
-            x, y);
+    particles.positions[i] = Vec(x, y);
+    particles.prevPositions[i] = Vec(x, y);
+    particles.velocities[i] = Vec(0, 0);
   }
 }
 
 void Fluid::gridInit(int cols, float gap)
 {
   float xSpace = (cols - 1) * gap;
-  int n = particles.size();
+  int n = particles.size;
   int nRows = std::ceil(static_cast<float>(n) / static_cast<float>(cols));
   float ySpace = (nRows - 1) * gap;
   const float xStart = (boundSize.x / 2) - (xSpace / 2);
@@ -196,7 +197,9 @@ void Fluid::gridInit(int cols, float gap)
   {
     for (int c = 0; c < cols && created < n; c++, x += gap, created++)
     {
-      particles[created] = Particle(x, y);
+      particles.positions[created] = Vec(x, y);
+      particles.prevPositions[created] = Vec(x, y);
+      particles.velocities[created] = Vec(0, 0);
     }
     x = xStart;
   }
@@ -204,24 +207,21 @@ void Fluid::gridInit(int cols, float gap)
 
 void Fluid::applyViscosity(float deltaTime)
 {
-  for (auto &i : particles)
+  for (int i = 0; i < particles.size; ++i)
   {
-    for (auto &j : grid.adj(i))
+    for (const auto &j : grid.adj(particles.positions[i]))
     {
-      Vec rij = i.position - j.position;
+      Vec rij = particles.positions[i] - particles.positions[j];
       float q = rij.mag() / params.smoothingRadius;
-      if (&i == &j)
-        continue;
-      if (q < 1.f)
+      if (q <= 0 || q > 1.f)
+        return;
+      // inward velocity
+      float u = (particles.velocities[i] - particles.velocities[j]).dot(rij / rij.mag());
+      if (u > 0)
       {
-        // inward velocity
-        float u = (i.velocity - j.velocity).dot(rij / rij.mag());
-        if (u > 0)
-        {
-          Vec impulse = deltaTime * (1 - q) * (params.viscosityDelta * u + params.viscosityBeta * std::pow(u, 2)) * rij / rij.mag();
-          i.velocity -= impulse;
-          j.velocity += impulse;
-        }
+        Vec impulse = deltaTime * (1 - q) * (params.viscosityDelta * u + params.viscosityBeta * std::pow(u, 2)) * rij / rij.mag();
+        particles.velocities[i] -= impulse;
+        particles.velocities[j] += impulse;
       }
     }
   }
@@ -229,33 +229,33 @@ void Fluid::applyViscosity(float deltaTime)
 
 void Fluid::computeDensityGrid(std::vector<std::vector<float>> &grid) const
 {
-  // expect zeroed vector of size renderWidth, renderWidth
-  const int pxRadius = params.smoothingRadius * scale;
-  for (const auto &p : particles)
-  {
-    Vec px = stor(p.position);
-    for (int row = px.y - pxRadius; row <= px.y + pxRadius; row++)
-    {
-      for (int col = px.x - pxRadius; col <= px.x + pxRadius; col++)
-      {
-        if (row < 0 || row >= params.renderHeight || col < 0 || col >= params.renderWidth)
-        {
-          continue;
-        }
-        Vec rp = rtos(Vec(col, row));
-        float dist = (rp - p.position).mag();
-        grid[row][col] += smoothingKernel(dist);
-      }
-    }
-  }
-  for (auto &row : grid)
-  {
-    for (int i = 0; i < row.size(); ++i)
-    {
-      row[i] -= params.targetDensity;
-    }
-  }
-  normalizeDensityGrid(grid);
+  // // expect zeroed vector of size renderWidth, renderWidth
+  // const int pxRadius = params.smoothingRadius * scale;
+  // for (const auto &p : particles)
+  // {
+  //   Vec px = stor(p.position);
+  //   for (int row = px.y - pxRadius; row <= px.y + pxRadius; row++)
+  //   {
+  //     for (int col = px.x - pxRadius; col <= px.x + pxRadius; col++)
+  //     {
+  //       if (row < 0 || row >= params.renderHeight || col < 0 || col >= params.renderWidth)
+  //       {
+  //         continue;
+  //       }
+  //       Vec rp = rtos(Vec(col, row));
+  //       float dist = (rp - p.position).mag();
+  //       grid[row][col] += smoothingKernel(dist);
+  //     }
+  //   }
+  // }
+  // for (auto &row : grid)
+  // {
+  //   for (int i = 0; i < row.size(); ++i)
+  //   {
+  //     row[i] -= params.targetDensity;
+  //   }
+  // }
+  // normalizeDensityGrid(grid);
 }
 
 void Fluid::normalizeDensityGrid(std::vector<std::vector<float>> &grid) const

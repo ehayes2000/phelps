@@ -1,6 +1,6 @@
 #pragma once
 #include "grid.hpp"
-#include "particle.hpp"
+#include "particles.hpp"
 #include "vec.hpp"
 
 class AdjacentParticles
@@ -13,10 +13,10 @@ public:
   {
   public:
     using iterator_category = std::forward_iterator_tag;
-    using difference_type = int;
-    using value_type = Particle;
-    using pointer = Particle *;
-    using reference = Particle &;
+    using difference_type = unsigned int;
+    using value_type = unsigned int;
+    using pointer = unsigned int*;
+    using reference = unsigned int;
     using ParticlesView = Grid::ParticlesView;
 
   public:
@@ -35,8 +35,8 @@ public:
     iterator& operator++() { next(); return *this; }
     iterator operator++(int) { iterator retval = *this; ++(*this); return retval; }
     reference operator*() const {
-      const ParticlesView* particles = getCollection();
-      return *(*particles)[particle_i];
+      const ParticlesView* view = getCollection();
+      return view->operator[](particle_i);
     }
     reference operator->() const { 
       return *(*this);

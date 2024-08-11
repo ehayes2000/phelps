@@ -20,8 +20,8 @@ int Grid::hashCell(const Vec &p) const {
 
 void Grid::gridify(Particles &particles) { 
   cells.clear();
-  for (Particle &p: particles){
-    int hash = hashCell(p.position);
-    cells[hash].push_back(&p);
+  for (int i = 0; i < particles.size; ++i){
+    int hash = hashCell(particles.positions[i]);
+    cells[hash].push_back(i);
   }
 }

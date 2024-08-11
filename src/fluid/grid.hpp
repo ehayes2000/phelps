@@ -1,14 +1,13 @@
 #pragma once
 #include "vec.hpp"
-#include "particle.hpp"
+#include "particles.hpp"
 #include <vector>
 #include <map>
 #include <iostream>
 
 class Grid { 
 public:
-  using Particles = std::vector<Particle>;
-  using ParticlesView = std::vector<Particle*>;
+  using ParticlesView = std::vector<unsigned int>;
 public:
   Grid(Vec &boundSize, float &cellSize): 
     cellSize(cellSize),

@@ -23,7 +23,7 @@ private:
   int width;
   sf::RenderWindow window;
   const sf::Sprite getDensityImage() const;
-  sf::CircleShape makeDrawable(const Particle &p) const ;
+  sf::CircleShape makeDrawable(const int) const ;
   sf::Color plasmaGradient(float value, float minVal, float maxVal) const;
   void handleSfEvent(sf::Event&);
   void drawParticles();

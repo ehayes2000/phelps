@@ -1,5 +1,5 @@
 #pragma once
-#include "particle.hpp"
+#include "particles.hpp"
 #include "grid.hpp"
 #include "adjacentParticles.hpp"
 #include <iostream> 
@@ -7,8 +7,7 @@
 
 class GridView { 
 public:
-  using Particles = std::vector<Particle>;
-  using ParticlesView = std::vector<Particle*>;
+  using ParticlesView = Grid::ParticlesView;
 public:
   GridView(Vec &boundSize, float &smoothingRadius): 
     grid(boundSize, smoothingRadius)
@@ -19,9 +18,6 @@ public:
     return grid.viewCell(p);
   }
 
-  AdjacentParticles adj(const Particle &p) const { 
-    return AdjacentParticles(p.position, grid);
-  }
   AdjacentParticles adj(const Vec &p) const { 
     return AdjacentParticles(p, grid);
   }
