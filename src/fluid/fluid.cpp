@@ -3,7 +3,6 @@
 
 void Fluid::step(float deltaTime)
 {
-  std::cout << params.smoothingKernelVolume << std::endl;
   grid.gridify(particles);
   if (deltaTime <= 0.f)
     return;
@@ -74,7 +73,7 @@ float Fluid::computeDensity(const Vec &p) const
       density += smoothingKernel(dist);
     }
   }
-  return density / params.smoothingKernelVolume;
+  return density;
 }
 
 inline float Fluid::computeNearPseudoPressure(const float nearDensity) const
