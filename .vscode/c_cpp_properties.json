@@ -4,7 +4,9 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/build/**"
+                "${workspaceFolder}/build/**",
+                "${workspaceFolder}/imgui/**",
+                "/usr/local/include/SDL2"
             ],
             "defines": [],
             "macFrameworkPath": [
