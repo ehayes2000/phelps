@@ -26,8 +26,6 @@ class Color {
   uint8_t b;
 }; 
 
-
-
 class SdlFluid { 
 public:
   SdlFluid(FluidParameters params):
@@ -38,8 +36,9 @@ public:
   }
 
   void startRenderLoop();
-  static void stepMainLoop(SdlFluid *sdlFluid);
-  
+  void stepRenderLoop();
+  void cleanupRenderLoop();
+  bool isDone() const { return done; }
 private:
   void init();
   FluidParameters fluidParams;

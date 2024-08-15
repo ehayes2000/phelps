@@ -11,3 +11,4 @@ CPackSourceConfig.cmake
 phelp
 traces
 dependencies
+embuild

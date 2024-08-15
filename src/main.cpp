@@ -2,7 +2,10 @@
 
 void mainloop(void* ctx)  { 
     SdlFluid* fluid = static_cast<SdlFluid*>(ctx);
-    SdlFluid::stepMainLoop(fluid);
+    fluid->stepRenderLoop();
+    if (fluid->isDone()) { 
+        fluid->cleanupRenderLoop();
+    }
 }
 
 int main() { 

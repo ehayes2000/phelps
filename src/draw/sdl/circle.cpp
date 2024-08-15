@@ -1,9 +1,10 @@
 #include "circle.h"
+
+// stolen from stack overflow :)
 int SDL_RenderDrawCircle(SDL_Renderer * renderer, int x, int y, int radius)
 {
     int offsetx, offsety, d;
     int status;
-
 
     offsetx = 0;
     offsety = radius;

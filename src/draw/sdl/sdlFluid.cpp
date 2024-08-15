@@ -12,7 +12,6 @@ void SdlFluid::drawParticles(const float deltaTime)
 
 void SdlFluid::handleSdlEvent(const SDL_Event &event)
 {
-  // TODO
   if (event.type == SDL_EventType::SDL_KEYDOWN && event.key.keysym.scancode == SDL_Scancode::SDL_SCANCODE_ESCAPE)
   {
     params.isDebugMenu = !params.isDebugMenu;
@@ -33,6 +32,9 @@ void SdlFluid::handleSdlEvent(const SDL_Event &event)
   {
     params.mousePos.x = event.motion.x;
     params.mousePos.y = event.motion.y;
+  }
+  else if (event.type == SDL_EventType::SDL_KEYDOWN && event.key.keysym.scancode == SDL_Scancode::SDL_SCANCODE_SPACE){ 
+    params.isPaused = !params.isPaused;
   }
 }
 
@@ -81,13 +83,15 @@ void SdlFluid::startRenderLoop()
 {
   while (!done)
   {
-    stepMainLoop(this);
+    this->stepRenderLoop();
   }
-  // Cleanup
+  cleanupRenderLoop();
+}
+
+void SdlFluid::cleanupRenderLoop() { 
   ImGui_ImplSDLRenderer2_Shutdown();
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
-
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
@@ -124,11 +128,11 @@ void SdlFluid::showDebugUi()
   ImGui::End();
 }
 
-void SdlFluid::stepMainLoop(SdlFluid *sdlFluid)
+void SdlFluid::stepRenderLoop()
 {
-  SDL_RenderClear(sdlFluid->renderer);
-  sdlFluid->deltaTime = (sdlFluid->time - SDL_GetTicks()) / 1.f;
-  sdlFluid->fluid.step(sdlFluid->deltaTime);
+  SDL_RenderClear(renderer);
+  deltaTime = (time - SDL_GetTicks()) / 1.f;
+  fluid.step(deltaTime);
   SDL_Event event;
 
   ImGui_ImplSDLRenderer2_NewFrame();
@@ -138,41 +142,41 @@ void SdlFluid::stepMainLoop(SdlFluid *sdlFluid)
   while (SDL_PollEvent(&event))
   {
     ImGui_ImplSDL2_ProcessEvent(&event);
-    sdlFluid->handleSdlEvent(event);
+    handleSdlEvent(event);
     if (event.type == SDL_QUIT)
-      sdlFluid->done = true;
-    if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(sdlFluid->window))
-      sdlFluid->done = true;
+      done = true;
+    if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+      done = true;
   }
-  if (sdlFluid->params.isDensityView)
+  if (params.isDensityView)
   {
     // TODO
   }
-  else if (sdlFluid->params.isAdjacentView)
+  else if (params.isAdjacentView)
   {
-    sdlFluid->drawParticles(sdlFluid->deltaTime);
-    sdlFluid->highlightAdjacentParticles();
+    drawParticles(deltaTime);
+    highlightAdjacentParticles();
   }
   else
   {
-    sdlFluid->drawParticles(sdlFluid->deltaTime);
+    drawParticles(deltaTime);
   }
-  if (sdlFluid->params.isDebugMenu)
+  if (params.isDebugMenu)
   {
-    sdlFluid->showDebugUi();
+    showDebugUi();
   }
-  else if (!sdlFluid->params.isPaused)
+  else if (!params.isPaused)
   {
-    sdlFluid->fluid.step(sdlFluid->deltaTime);
+    fluid.step(deltaTime);
   }
-  if (sdlFluid->params.isLClick)
+  if (params.isLClick)
   {
-    Vec simPoint = sdlFluid->fluid.rtos(sdlFluid->params.mousePos);
-    sdlFluid->fluid.applyForce(simPoint, .000000000001, .2f);
+    Vec simPoint = fluid.rtos(params.mousePos);
+    fluid.applyForce(simPoint, .000000000001, .2f);
   }
   ImGui::Render();
-  ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), sdlFluid->renderer);
-  SDL_RenderPresent(sdlFluid->renderer);
+  ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
+  SDL_RenderPresent(renderer);
 }
 
 void SdlFluid::drawParticle(const int i, const float deltaTime)
