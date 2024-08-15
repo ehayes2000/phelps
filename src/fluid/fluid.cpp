@@ -10,13 +10,14 @@ void Fluid::step(float deltaTime)
   {
     v += Vec(0.f, -deltaTime * params.gravity);
   }
-  applyViscosity(deltaTime);
+  // applyViscosity(deltaTime);
+  
   for (int i = 0; i < particles.size; ++ i)
   {
     particles.prevPositions[i] = particles.positions[i];
     particles.positions[i] += deltaTime * particles.velocities[i];
   }
-  doubleDensityRelaxation(deltaTime);
+  doubleDensityRelaxation();
   for (int i = 0; i < particles.size; ++i)
   {
     particles.velocities[i] = (particles.positions[i] - particles.prevPositions[i]) / deltaTime;
@@ -88,7 +89,6 @@ inline float Fluid::computePseudoPressure(const float density) const
 
 Vec Fluid::relaxationDisplacement(const int i,
                                   const int j,
-                                  const float deltaTime,
                                   const float pressure,
                                   const float nearPressure) const
 {
@@ -102,11 +102,11 @@ Vec Fluid::relaxationDisplacement(const int i,
                     nearPressure * std::pow(1.f - rij.mag() / params.smoothingRadius, 2));
 }
 
-void Fluid::doubleDensityRelaxation(float deltaTime)
+void Fluid::doubleDensityRelaxation()
 {
   for (int i = 0; i < particles.size; i ++)
   {
-    Vec predicted = particles.positions[i] + deltaTime * particles.velocities[i];
+    // Vec predicted = particles.positions[i] + deltaTime * particles.velocities[i];
     float density = computeDensity(particles.positions[i]);
     float pressure = computePseudoPressure(density);
     float nearDensity = computeNearDensity(particles.positions[i]);
@@ -117,7 +117,7 @@ void Fluid::doubleDensityRelaxation(float deltaTime)
       float q = (particles.positions[i] - particles.positions[j]).mag() / params.smoothingRadius;
       if(q > 0 && q < 1.f)
       {
-        Vec displacement = relaxationDisplacement(i, j, deltaTime, pressure, nearPressure);
+        Vec displacement = relaxationDisplacement(i, j, pressure, nearPressure);
         particles.positions[j] -= displacement / 2.f;
         dx += displacement / 2.f;
       }
@@ -228,6 +228,7 @@ void Fluid::applyViscosity(float deltaTime)
 
 void Fluid::computeDensityGrid(std::vector<std::vector<float>> &grid) const
 {
+  grid[0][0] = 0;
   // // expect zeroed vector of size renderWidth, renderWidth
   // const int pxRadius = params.smoothingRadius * scale;
   // for (const auto &p : particles)
@@ -270,7 +271,7 @@ void Fluid::normalizeDensityGrid(std::vector<std::vector<float>> &grid) const
   }
   for (auto &row : grid)
   {
-    for (int i = 0; i < row.size(); i++)
+    for (int i = 0; i < static_cast<int>(row.size()); i++)
     {
       row[i] /= max;
     }

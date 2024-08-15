@@ -1,4 +1,5 @@
 #pragma once
+#include "../fluid/vec.hpp"
 
 struct RenderParameters { 
   bool isPaused = true;
@@ -8,4 +9,5 @@ struct RenderParameters {
   bool isLClick = false;
   bool isRClick = false;
   int guiScale = 1;
+  Vec mousePos;
 };

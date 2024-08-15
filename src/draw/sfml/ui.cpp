@@ -6,7 +6,7 @@ void ShowUi(RenderParameters &params,
   bool * p_open) {
   const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
-  ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowSize(ImVec2(550, 6), ImGuiCond_FirstUseEver);
   ImGuiWindowFlags window_flags = 0;
   if (!ImGui::Begin("Debug", p_open, window_flags)){
     ImGui::End();

@@ -19,14 +19,14 @@ public:
   const GridView& getGrid() const { return grid; }
   FluidParameters &params;  
   Fluid(FluidParameters &params):
-    scale(std::max(params.renderHeight, params.renderWidth)), 
     params(params),
+    scale(std::max(params.renderHeight, params.renderWidth)), 
+    particles(params.nParticles),
     boundSize(params.renderWidth / scale, params.renderHeight / scale),
-    grid(boundSize, params.smoothingRadius),
-    particles(params.nParticles)
+    grid(boundSize, params.smoothingRadius)
   {
     // randomInit(nParticles);
-    gridInit(25, .04);
+    gridInit(25, .08);
   }
   void step(float deltaTime);
   void applyForce(Vec &p, float force, float radius);
@@ -80,9 +80,8 @@ private:
   Vec relaxationDisplacement(
     const int i, 
     const int j,
-    const float deltaTime,
     const float pressure,
     const float nearPressure) const;
-  void doubleDensityRelaxation(float deltaTime);
+  void doubleDensityRelaxation();
   void applyViscosity(float deltaTime);
 };

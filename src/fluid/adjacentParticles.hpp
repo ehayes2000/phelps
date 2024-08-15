@@ -55,7 +55,6 @@ public:
     void next();
     void init();
     const ParticlesView* getCollection() const;
-    const ParticlesView* currentCollection; 
   };
 
 public:

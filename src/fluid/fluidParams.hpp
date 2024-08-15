@@ -6,7 +6,7 @@ class FluidParameters {
 public:
   float collisionDamping = .5f;
   float smoothingRadius = .08; //.08
-  float renderRadius = .005;
+  float renderRadius = .004;
   float particleMass = 1.f;
   float targetDensity = 1.;
   float pressureMultiplier = 0.001f;
@@ -16,5 +16,5 @@ public:
   float gravity = 0.f;
   int renderHeight = 720;
   int renderWidth = 1080;
-  int nParticles = 700;
+  int nParticles = 300;
 };
