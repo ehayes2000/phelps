@@ -2,7 +2,7 @@
 #include "../fluid/vec.hpp"
 
 struct RenderParameters { 
-  bool isPaused = true;
+  bool isPaused = false;
   bool isDebugMenu = false;
   bool isAdjacentView = false;
   bool isDensityView = false;

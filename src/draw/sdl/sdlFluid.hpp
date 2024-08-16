@@ -35,12 +35,16 @@ public:
     init();
   }
 
+  Fluid operator=(Fluid &f){  
+    return f;
+  }
   void startRenderLoop();
   void stepRenderLoop();
   void cleanupRenderLoop();
   bool isDone() const { return done; }
 private:
   void init();
+  static constexpr float ticksPerSecond = 1000.f;
   FluidParameters fluidParams;
   RenderParameters params;
   Fluid fluid;
@@ -53,7 +57,6 @@ private:
   void showDebugUi();
   Color plasmaGradient(float value, float minVal, float maxVal) const;
 
-  Uint32 time;
-  float deltaTime;
+  Uint32 nowTicks, prevTicks;
   bool done;
 };

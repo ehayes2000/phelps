@@ -18,6 +18,7 @@ class Fluid {
 public:
   const GridView& getGrid() const { return grid; }
   FluidParameters &params;  
+
   Fluid(FluidParameters &params):
     params(params),
     scale(std::max(params.renderHeight, params.renderWidth)), 
@@ -28,7 +29,15 @@ public:
     // randomInit(nParticles);
     gridInit(25, .08);
   }
-  void step(float deltaTime);
+
+  void setBounds(int h, int w){  
+    params.renderWidth = w;
+    params.renderHeight = h;
+    scale = std::max(params.renderHeight, params.renderWidth);
+    boundSize = Vec(params.renderWidth / scale, params.renderHeight / scale);
+  }
+
+  void step(float deltaSec);
   void applyForce(Vec &p, float force, float radius);
   void computeDensityGrid(std::vector<std::vector<float>> &) const;
   float getScale() const { return scale; }

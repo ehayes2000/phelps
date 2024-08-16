@@ -48,8 +48,13 @@ void SdlFluid::init()
     exit(1);
   }
   // Create window with SDL_Renderer graphics context
-  SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+  SDL_WindowFlags window_flags = (SDL_WindowFlags)(NULL);
   this->window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, fluidParams.renderWidth, fluidParams.renderHeight, window_flags);
+  // std::cout << fluidParams.renderHeight << std::endl;
+  // int height, width;
+  // SDL_GetWindowSize(this->window, &width, &height);
+  // fluid.setBounds(height, width);
+  // std::cout << fluidParams.renderHeight << std::endl;
   if (window == nullptr)
   {
     printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -72,9 +77,7 @@ void SdlFluid::init()
 
   // main loop vars :)
   done = false;
-  time = 0;
-  deltaTime = 0.f;
-  fluid.step(.01);
+  fluid.step(.0001);
   ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
   ImGui_ImplSDLRenderer2_Init(renderer);
 }
@@ -131,8 +134,10 @@ void SdlFluid::showDebugUi()
 void SdlFluid::stepRenderLoop()
 {
   SDL_RenderClear(renderer);
-  deltaTime = (time - SDL_GetTicks()) / 1.f;
-  fluid.step(deltaTime);
+  nowTicks = SDL_GetTicks(); 
+  float deltaSec = static_cast<float>(nowTicks - prevTicks) / ticksPerSecond;
+  prevTicks = nowTicks;
+
   SDL_Event event;
 
   ImGui_ImplSDLRenderer2_NewFrame();
@@ -154,12 +159,12 @@ void SdlFluid::stepRenderLoop()
   }
   else if (params.isAdjacentView)
   {
-    drawParticles(deltaTime);
+    drawParticles(deltaSec);
     highlightAdjacentParticles();
   }
   else
   {
-    drawParticles(deltaTime);
+    drawParticles(deltaSec);
   }
   if (params.isDebugMenu)
   {
@@ -167,7 +172,7 @@ void SdlFluid::stepRenderLoop()
   }
   else if (!params.isPaused)
   {
-    fluid.step(deltaTime);
+    fluid.step(deltaSec);
   }
   if (params.isLClick)
   {
