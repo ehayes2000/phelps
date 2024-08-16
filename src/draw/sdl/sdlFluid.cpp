@@ -19,14 +19,18 @@ void SdlFluid::handleSdlEvent(const SDL_Event &event)
   else if (event.type == SDL_EventType::SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
   {
     params.isLClick = true;
-    params.mousePos.x = event.button.x;
-    params.mousePos.y = event.button.y;
   }
   else if (event.type == SDL_EventType::SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
   {
     params.isLClick = false;
-    params.mousePos.x = event.button.x;
-    params.mousePos.y = event.button.y;
+  }
+  else if (event.type == SDL_EventType::SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
+  {
+    params.isRClick = true;
+  }
+  else if (event.type == SDL_EventType::SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_RIGHT)
+  {
+    params.isRClick = false;
   }
   else if (event.type == SDL_EventType::SDL_MOUSEMOTION)
   {
@@ -47,14 +51,9 @@ void SdlFluid::init()
     printf("Error: %s\n", SDL_GetError());
     exit(1);
   }
-  // Create window with SDL_Renderer graphics context
   SDL_WindowFlags window_flags = (SDL_WindowFlags)(NULL);
   this->window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, fluidParams.renderWidth, fluidParams.renderHeight, window_flags);
-  // std::cout << fluidParams.renderHeight << std::endl;
-  // int height, width;
-  // SDL_GetWindowSize(this->window, &width, &height);
-  // fluid.setBounds(height, width);
-  // std::cout << fluidParams.renderHeight << std::endl;
+
   if (window == nullptr)
   {
     printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -177,7 +176,12 @@ void SdlFluid::stepRenderLoop()
   if (params.isLClick)
   {
     Vec simPoint = fluid.rtos(params.mousePos);
-    fluid.applyForce(simPoint, .000000000001, .2f);
+    fluid.applyForce(simPoint, .2 , .5f);
+  }
+  else if (params.isRClick)
+  {
+    Vec simPoint = fluid.rtos(params.mousePos);
+    fluid.applyForce(simPoint, -.2 , .5f);
   }
   ImGui::Render();
   ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);

@@ -5,16 +5,15 @@
 class FluidParameters { 
 public:
   float collisionDamping = .5f;
-  float smoothingRadius = .08; //.08
-  float renderRadius = .004;
-  float particleMass = 1.f;
-  float targetDensity = 1.;
+  float smoothingRadius = .03; //.08
+  float renderRadius = .002;
+  float targetDensity = .5;
   float pressureMultiplier = 0.001f;
-  float nearPressureMultiplier = 0.001f;
+  float nearPressureMultiplier = 0.000f;
   float viscosityBeta = 0.0; // non-zero for viscos fluids
   float viscosityDelta = .5;
   float gravity = 0.f;
-  int renderHeight = 720;
-  int renderWidth = 1080;
-  int nParticles = 300;
+  int renderHeight = 1080;
+  int renderWidth = 1920;
+  int nParticles = 2000;
 };
