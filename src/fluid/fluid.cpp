@@ -32,6 +32,11 @@ float kernel(const float dist, const float radius)
   return std::pow(1 - dist / radius, 2);
 }
 
+float cubicKernel(const float dist, const float radius) { 
+  float v = radius * radius - dist * dist;
+	return v * v * v * 10000; 
+}
+
 float nearKernel(const float dist, const float radius)
 {
   if (dist > radius)
@@ -136,11 +141,11 @@ void Fluid::doubleDensityRelaxation()
 
 void Fluid::applyForce(Vec &p, float force, float radius)
 {
-  for (auto i: grid.adj(p)) { 
+  for (int i = 0; i < particles.size; ++i){
     Vec offset = particles.positions[i] - p;
     float dist = offset.mag();
-    if (dist > 0) { 
-      float influence = kernel(dist, radius);
+    if (dist > 0 && dist < radius) { 
+      float influence = cubicKernel(dist, radius);
       Vec forceVec = (offset / dist) * influence * force;
       particles.velocities[i] += forceVec;
     }
@@ -190,28 +195,54 @@ void Fluid::randomInit(int n)
   }
 }
 
+// void Fluid::gridInit(int cols, float gap)
+// {
+
+//   float xSpace = (cols - 1) * gap;
+//   int n = particles.size;
+//   int nRows = std::ceil(static_cast<float>(n) / static_cast<float>(cols));
+//   float ySpace = (nRows - 1) * gap;
+//   const float xStart = (boundSize.x / 2) - (xSpace / 2);
+//   float x = xStart;
+//   float y = (boundSize.y / 2) + (ySpace / 2);
+//   int created = 0;
+//   for (int r = 0; r < nRows && created < n; r++, y -= gap)
+//   {
+//     for (int c = 0; c < cols && created < n; c++, x += gap, created++)
+//     {
+//       particles.positions[created] = Vec(x, y);
+//       particles.prevPositions[created] = Vec(x, y);
+//       particles.velocities[created] = Vec(0, 0);
+//     }
+//     x = xStart;
+//   }
+// }
+
+
 void Fluid::gridInit(int cols, float gap)
 {
-  float xSpace = (cols - 1) * gap;
-  int n = particles.size;
-  int nRows = std::ceil(static_cast<float>(n) / static_cast<float>(cols));
-  float ySpace = (nRows - 1) * gap;
-  const float xStart = (boundSize.x / 2) - (xSpace / 2);
-  float x = xStart;
-  float y = (boundSize.y / 2) + (ySpace / 2);
-  int created = 0;
-  for (int r = 0; r < nRows && created < n; r++, y -= gap)
-  {
-    for (int c = 0; c < cols && created < n; c++, x += gap, created++)
-    {
-      particles.positions[created] = Vec(x, y);
-      particles.prevPositions[created] = Vec(x, y);
-      particles.velocities[created] = Vec(0, 0);
-    }
-    x = xStart;
-  }
-}
+    int n = particles.size;
+    int rows = (n + cols - 1) / cols;  // Ceiling division to get number of rows
 
+    float totalWidth = (cols - 1) * gap;
+    float totalHeight = (rows - 1) * gap;
+    
+    float startX = (boundSize.x - totalWidth) / 2;
+    float startY = (boundSize.y - totalHeight) / 2;
+
+    for (int i = 0; i < n; i++)
+    {
+        int row = i / cols;
+        int col = i % cols;
+
+        float x = startX + col * gap;
+        float y = startY + row * gap;
+
+        particles.positions[i] = Vec(x, y);
+        particles.prevPositions[i] = Vec(x, y);
+        particles.velocities[i] = Vec(0, 0);
+    }
+}
 void Fluid::applyViscosity(float deltaTime)
 {
   for (int i = 0; i < particles.size; ++i)

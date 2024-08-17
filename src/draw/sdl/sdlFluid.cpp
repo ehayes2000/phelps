@@ -176,12 +176,12 @@ void SdlFluid::stepRenderLoop()
   if (params.isLClick)
   {
     Vec simPoint = fluid.rtos(params.mousePos);
-    fluid.applyForce(simPoint, .2 , .5f);
+    fluid.applyForce(simPoint, .1 , .2f);
   }
   else if (params.isRClick)
   {
     Vec simPoint = fluid.rtos(params.mousePos);
-    fluid.applyForce(simPoint, -.2 , .5f);
+    fluid.applyForce(simPoint, -.1 , .2f);
   }
   ImGui::Render();
   ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
