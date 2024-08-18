@@ -113,10 +113,10 @@ void SdlFluid::showDebugUi()
     return;
   }
   ImGui::Checkbox("Adjacent View", &params.isAdjacentView);
-  ImGui::Checkbox("Density View", &params.isDensityView);
   ImGui::Separator();
   const float dragSpeed = .001;
   const float range = 100.f;
+  const float smoothingRadius = fluidParams.smoothingRadius;
   ImGui::Text("Fluid Parameters");
   ImGui::DragFloat("Collision Damping", &fluidParams.collisionDamping, dragSpeed, -range, range);
   ImGui::DragFloat("Smoothing Radius", &fluidParams.smoothingRadius, dragSpeed, -range, range);
@@ -125,8 +125,9 @@ void SdlFluid::showDebugUi()
   ImGui::DragFloat("Near Pressure", &fluidParams.nearPressureMultiplier, dragSpeed, -range, range);
   ImGui::DragFloat("Viscosity Beta", &fluidParams.viscosityBeta, dragSpeed, -range, range);
   ImGui::DragFloat("Viscosity Delta", &fluidParams.viscosityDelta, dragSpeed, -range, range);
-  ImGui::DragFloat("Gravity", &fluidParams.gravity, dragSpeed, -range, range);
-  ImGui::DragScalar("N Particles", ImGuiDataType_U32, &fluidParams.nParticles, dragSpeed);
+  if (smoothingRadius != fluidParams.smoothingRadius){
+    fluid.regrid();
+  }
   ImGui::End();
 }
 
@@ -173,12 +174,12 @@ void SdlFluid::stepRenderLoop()
   {
     fluid.step(deltaSec);
   }
-  if (params.isLClick)
+  if (params.isLClick && !params.isPaused)
   {
     Vec simPoint = fluid.rtos(params.mousePos);
     fluid.pushForce(simPoint);
   }
-  else if (params.isRClick)
+  else if (params.isRClick && !params.isPaused)
   {
     Vec simPoint = fluid.rtos(params.mousePos);
     fluid.pullForce(simPoint);
@@ -201,6 +202,14 @@ void SdlFluid::drawParticle(const int i, const float deltaTime)
 
 void SdlFluid::highlightAdjacentParticles()
 {
+  Vec simPos = fluid.rtos(params.mousePos);
+  GridView grid = fluid.getGrid();
+  for (int i : grid.adj(simPos)){
+    Vec pos = fluid.stor(fluid.getParticles().positions[i]);
+    SDL_SetRenderDrawColor(renderer, 0, 150, 0, 0);
+    SDL_RenderFillCircle(renderer, pos.x, pos.y, fluid.getScale()* fluidParams.renderRadius);
+  }
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0 ,0);
 }
 
 Color SdlFluid::plasmaGradient(float value, float minValue, float maxValue) const

@@ -13,7 +13,9 @@ public:
     grid(boundSize, smoothingRadius)
     {}
   void gridify(Particles &ps) { grid.gridify(ps); }
-
+  void regrid(Vec &boundSize, float &smoothingRadius) { 
+    new (&this->grid) Grid(boundSize, smoothingRadius);
+  }
   const ParticlesView *cellCollection(const Vec &p) const {
     return grid.viewCell(p);
   }

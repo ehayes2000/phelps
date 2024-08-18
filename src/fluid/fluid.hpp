@@ -41,6 +41,10 @@ public:
   void step(float deltaSec);
   void pushForce(Vec &p);
   void pullForce(Vec &p);
+  void regrid() {  
+    grid.regrid(boundSize, params.smoothingRadius);
+    grid.gridify(particles);
+  } 
   void computeDensityGrid(std::vector<std::vector<float>> &) const;
   float getScale() const { return scale; }
   const Particles& getParticles() const { return particles; }
