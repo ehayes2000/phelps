@@ -27,7 +27,8 @@ public:
     grid(boundSize, params.smoothingRadius)
   {
     // randomInit(nParticles);
-    gridInit(200, params.smoothingRadius / 1.3);
+    // gridInit(200, params.smoothingRadius / 1.3);
+    fullGridInit();
   }
 
   void setBounds(int h, int w){  
@@ -59,8 +60,8 @@ public:
       simulation to render space
     */
     return Vec(
-      scale * (p.x - params.renderRadius),
-      scale * (boundSize.y - p.y - params.renderRadius) // 720 * (.666666 - .661 - .005)
+      scale * (p.x),
+      scale * (boundSize.y - p.y)
     );
   }
 
@@ -84,6 +85,7 @@ private:
   float computeNearPseudoPressure(const float) const;
   float computePseudoPressure(const float) const;
   void gridInit(int cols, float gap);
+  void fullGridInit();
   void randomInit(int n);
   void boundryCollision(const int);
   void normalizeDensityGrid(std::vector<std::vector<float>>&) const;

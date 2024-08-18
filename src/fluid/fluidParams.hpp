@@ -9,7 +9,7 @@ public:
   float renderRadius = .0018;
   float targetDensity = .1;
   float pressureMultiplier = 0.002f;
-  float nearPressureMultiplier = 0.000f;
+  float nearPressureMultiplier = 0.001f;
   float viscosityBeta = 0.9; // non-zero for viscos fluids
   float viscosityDelta = .5;
   float gravity = 0.f;
@@ -17,5 +17,5 @@ public:
   int renderWidth = 1710;
   int nParticles = 8000;
   int resolutionIterations = 3;
-  float forceRadius = .18;
+  float forceRadius = .15;
 };

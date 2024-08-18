@@ -3,7 +3,6 @@
 
 void Fluid::step(float deltaSec)
 {
-  grid.gridify(particles);
   if (deltaSec <= 0.f)
     return;
   applyViscosity(deltaSec);
@@ -24,6 +23,7 @@ void Fluid::step(float deltaSec)
   {
     v += Vec(0.f, -deltaSec * params.gravity);
   }
+  grid.gridify(particles);
 }
 
 float kernel(const float dist, const float radius)
@@ -347,4 +347,18 @@ void Fluid::particleCollision() {
       }
     }
   }
+}
+
+void Fluid::fullGridInit() {
+  int i = 0;
+  std::vector<Vec> pos;
+  std::vector<Vec> prevPos;
+  for (float xp = .01; xp <= 1; xp += params.smoothingRadius / 1.4){  
+    for (float yp = .01; yp <= boundSize.y - .01 ; yp += params.smoothingRadius / 1.4, ++i) { 
+      pos.push_back(Vec(xp, yp));
+      prevPos.push_back(Vec(xp, yp));
+    }
+  }
+  std::vector<Vec> vel(pos.size(), Vec(0, 0));
+  this->particles = Particles(pos, prevPos, vel);
 }
