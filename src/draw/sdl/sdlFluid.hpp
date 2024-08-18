@@ -55,6 +55,7 @@ private:
   void drawParticle(const int, const float);
   void highlightAdjacentParticles();
   void showDebugUi();
+  void reset();
   Color plasmaGradient(float value, float minVal, float maxVal) const;
 
   Uint32 nowTicks, prevTicks;

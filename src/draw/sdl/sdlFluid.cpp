@@ -40,6 +40,9 @@ void SdlFluid::handleSdlEvent(const SDL_Event &event)
   else if (event.type == SDL_EventType::SDL_KEYDOWN && event.key.keysym.scancode == SDL_Scancode::SDL_SCANCODE_SPACE){ 
     params.isPaused = !params.isPaused;
   }
+  else if (event.type == SDL_EventType::SDL_KEYDOWN && event.key.keysym.scancode == SDL_Scancode::SDL_SCANCODE_R){ 
+    params.isReset = true;
+  }
 }
 
 void SdlFluid::init()
@@ -143,7 +146,6 @@ void SdlFluid::stepRenderLoop()
   ImGui_ImplSDLRenderer2_NewFrame();
   ImGui_ImplSDL2_NewFrame();
   ImGui::NewFrame();
-
   while (SDL_PollEvent(&event))
   {
     ImGui_ImplSDL2_ProcessEvent(&event);
@@ -170,7 +172,7 @@ void SdlFluid::stepRenderLoop()
   {
     showDebugUi();
   }
-  else if (!params.isPaused)
+  if (!params.isPaused)
   {
     fluid.step(deltaSec);
   }
@@ -183,6 +185,10 @@ void SdlFluid::stepRenderLoop()
   {
     Vec simPoint = fluid.rtos(params.mousePos);
     fluid.pullForce(simPoint);
+  }
+  else if (params.isReset) { 
+    reset();
+    params.isReset = false;
   }
   ImGui::Render();
   ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
@@ -287,4 +293,9 @@ Color SdlFluid::plasmaGradient(float value, float minValue, float maxValue) cons
         color6.b + (color7.b - color6.b) * alpha);
   }
   return result;
+}
+
+void SdlFluid::reset() { 
+  new (&this->fluidParams) FluidParameters();
+  new (&this->fluid) Fluid(fluidParams);
 }
