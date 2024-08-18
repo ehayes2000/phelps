@@ -27,7 +27,7 @@ public:
     grid(boundSize, params.smoothingRadius)
   {
     // randomInit(nParticles);
-    gridInit(25, params.smoothingRadius / 1.3);
+    gridInit(200, params.smoothingRadius / 1.3);
   }
 
   void setBounds(int h, int w){  
@@ -38,7 +38,8 @@ public:
   }
 
   void step(float deltaSec);
-  void applyForce(Vec &p, float force, float radius);
+  void pushForce(Vec &p);
+  void pullForce(Vec &p);
   void computeDensityGrid(std::vector<std::vector<float>> &) const;
   float getScale() const { return scale; }
   const Particles& getParticles() const { return particles; }
@@ -93,4 +94,5 @@ private:
     const float nearPressure) const;
   void doubleDensityRelaxation();
   void applyViscosity(float deltaTime);
+  void particleCollision();
 };

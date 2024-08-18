@@ -19,6 +19,7 @@ void Fluid::step(float deltaSec)
     particles.velocities[i] = (particles.positions[i] - particles.prevPositions[i]) / deltaSec;
     boundryCollision(i);
   }
+  // particleCollision();
   for (auto &v : particles.velocities)
   {
     v += Vec(0.f, -deltaSec * params.gravity);
@@ -29,19 +30,21 @@ float kernel(const float dist, const float radius)
 {
   if (dist > radius)
     return 0.f;
-  return std::pow(1 - dist / radius, 2);
+  float k = std::min(std::pow(1 - dist / radius, 2), .1);
+  return k;
 }
 
 float cubicKernel(const float dist, const float radius) { 
   float v = radius * radius - dist * dist;
-	return v * v * v * 10000; 
+	return v * v * v; 
 }
 
 float nearKernel(const float dist, const float radius)
 {
   if (dist > radius)
     return 0.f;
-  return std::pow(1 - dist / radius, 3);
+  // return std::min(std::pow(1 - dist / radius, 3), .05);
+  return 0;
 }
 
 inline float Fluid::smoothingNearKernel(const float dist) const
@@ -139,14 +142,26 @@ void Fluid::doubleDensityRelaxation()
   // }
 }
 
-void Fluid::applyForce(Vec &p, float force, float radius)
+void Fluid::pushForce(Vec &p)
 {
   for (int i = 0; i < particles.size; ++i){
     Vec offset = particles.positions[i] - p;
     float dist = offset.mag();
-    if (dist > 0 && dist < radius) { 
-      float influence = cubicKernel(dist, radius);
-      Vec forceVec = (offset / dist) * influence * force;
+    if (dist > 0 && dist < params.forceRadius){
+      float influence = cubicKernel(dist, params.forceRadius) * 1000;
+      Vec forceVec = (offset / dist) * influence;
+      particles.velocities[i] += forceVec;
+    }
+  }
+}
+
+void Fluid::pullForce(Vec &p) { 
+  for (int i = 0; i < particles.size; ++i){
+    Vec offset = particles.positions[i] - p;
+    float dist = offset.mag();
+    if (dist > 0 && dist < params.forceRadius){
+      float influence = -.01;
+      Vec forceVec = (offset / dist) * influence;
       particles.velocities[i] += forceVec;
     }
   }
@@ -313,6 +328,23 @@ void Fluid::normalizeDensityGrid(std::vector<std::vector<float>> &grid) const
     for (int i = 0; i < static_cast<int>(row.size()); i++)
     {
       row[i] /= max;
+    }
+  }
+}
+
+void Fluid::particleCollision() { 
+  for (int _ = 0; _ < params.resolutionIterations; ++_) { 
+    for (int i = 0; i < particles.size; ++ i) { 
+      for (int j : grid.adj(particles.positions[i])) { 
+        Vec ij = particles.positions[i] - particles.positions[j];
+        float ijMag = ij.mag(); 
+        if (ijMag == 0) continue;
+        if (ijMag < 2 * params.renderRadius){ 
+          Vec correction = (2 * params.renderRadius - ijMag) * ij / ijMag;
+          particles.positions[i] += 0.5 * correction;
+          particles.positions[j] -= 0.5 * correction;
+        }
+      }
     }
   }
 }

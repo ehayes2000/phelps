@@ -176,12 +176,12 @@ void SdlFluid::stepRenderLoop()
   if (params.isLClick)
   {
     Vec simPoint = fluid.rtos(params.mousePos);
-    fluid.applyForce(simPoint, .1 , .2f);
+    fluid.pushForce(simPoint);
   }
   else if (params.isRClick)
   {
     Vec simPoint = fluid.rtos(params.mousePos);
-    fluid.applyForce(simPoint, -.1 , .2f);
+    fluid.pullForce(simPoint);
   }
   ImGui::Render();
   ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
@@ -193,7 +193,7 @@ void SdlFluid::drawParticle(const int i, const float deltaTime)
   const Particles &particles = fluid.getParticles();
   const Vec &pos = particles.positions[i];
   const Vec &vel = particles.velocities[i];
-  Color c = plasmaGradient(vel.mag(), 0, .01 / deltaTime);
+  Color c = plasmaGradient(vel.mag(), 0, .005 / deltaTime);
   Vec rpos = fluid.stor(pos);
   SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, 0);
   SDL_RenderFillCircle(renderer, rpos.x, rpos.y, fluid.getScale() * fluidParams.renderRadius);
