@@ -353,7 +353,7 @@ void Fluid::fullGridInit() {
   int i = 0;
   std::vector<Vec> pos;
   std::vector<Vec> prevPos;
-  for (float xp = .01; xp <= 1; xp += params.smoothingRadius / 1.4){  
+  for (float xp = .005; xp <= 1; xp += params.smoothingRadius / 1.4){  
     for (float yp = .01; yp <= boundSize.y - .01 ; yp += params.smoothingRadius / 1.4, ++i) { 
       pos.push_back(Vec(xp, yp));
       prevPos.push_back(Vec(xp, yp));
