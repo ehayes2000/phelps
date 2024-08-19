@@ -32,8 +32,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${IMGUI_PATH}/backends/
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror -O3>)
+target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:GCC>:/W4 /WX>)
+target_compile_options(${PROJECT_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:GCC>>:-Wall -Wextra -pedantic -Werror -O3>)
 INCLUDE(FindPkgConfig)
 # Find required packages
 find_package(SDL2 REQUIRED)
@@ -41,7 +41,7 @@ find_package(SDL2 REQUIRED)
 
 if(EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s USE_SDL=2 -s WASM=1")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s USE_SDL=2 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1")
 endif()
 
 # Link libraries
