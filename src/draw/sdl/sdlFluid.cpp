@@ -43,6 +43,17 @@ void SdlFluid::handleSdlEvent(const SDL_Event &event)
   else if (event.type == SDL_EventType::SDL_KEYDOWN && event.key.keysym.scancode == SDL_Scancode::SDL_SCANCODE_R){ 
     params.isReset = true;
   }
+  else if (event.type == SDL_WINDOWEVENT) { 
+    if (event.window.event == SDL_WINDOWEVENT_RESIZED || event.type == SDL_WINDOWEVENT_SIZE_CHANGED) { 
+    int width, height;
+    SDL_GetWindowSize(window, &width, &height);
+    fluidParams.renderHeight = height;
+    fluidParams.renderWidth = width;
+    fluid.~Fluid();
+    new (&this->fluid) Fluid(fluidParams);
+    std::cout << "resize" << std::endl;
+    }
+  }
 }
 
 void SdlFluid::init()
@@ -54,7 +65,7 @@ void SdlFluid::init()
     printf("Error: %s\n", SDL_GetError());
     exit(1);
   }
-  SDL_WindowFlags window_flags = (SDL_WindowFlags)(NULL);
+  SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE);
   this->window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, fluidParams.renderWidth, fluidParams.renderHeight, window_flags);
 
   if (window == nullptr)

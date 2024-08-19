@@ -362,3 +362,8 @@ void Fluid::fullGridInit() {
   std::vector<Vec> vel(pos.size(), Vec(0, 0));
   this->particles = Particles(pos, prevPos, vel);
 }
+
+void Fluid::resize(int width, int height) { 
+  scale = std::max(width, height);
+  boundSize = Vec(static_cast<float>(width) / scale, static_cast<float>(height) / scale);
+}

@@ -41,6 +41,7 @@ public:
   void step(float deltaSec);
   void pushForce(Vec &p);
   void pullForce(Vec &p);
+  void resize(int width, int height);
   void regrid() {  
     grid.regrid(boundSize, params.smoothingRadius);
     grid.gridify(particles);

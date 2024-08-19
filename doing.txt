@@ -1,4 +1,0 @@
-1. fix gravity by 
-  - a. standardize time step to seconds
-  - b. remove sim space normalization 
-  - c. try a fixed step? 
