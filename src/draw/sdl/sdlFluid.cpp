@@ -51,7 +51,6 @@ void SdlFluid::handleSdlEvent(const SDL_Event &event)
     fluidParams.renderWidth = width;
     fluid.~Fluid();
     new (&this->fluid) Fluid(fluidParams);
-    std::cout << "resize" << std::endl;
     }
   }
 }

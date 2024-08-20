@@ -33,10 +33,9 @@ public:
   SdlFluid(FluidParameters params) : fluidParams(params),
                                      fluid(fluidParams)
   {
-    std::cout << "CREATED FLUID" << std::endl;
     // Setup SDL
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE);
-    this->window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, fluidParams.renderWidth, fluidParams.renderHeight, window_flags);
+    this->window = SDL_CreateWindow("Phelps", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, fluidParams.renderWidth, fluidParams.renderHeight, window_flags);
 
     if (window == nullptr)
     {
@@ -50,8 +49,6 @@ public:
       exit(1);
     }
 
-    std::cout << "WINDOW AT:" << window << std::endl;
-    std::cout << "RENDERER AT:" << renderer << std::endl;
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
 
@@ -68,7 +65,6 @@ public:
   }
 
   ~SdlFluid() { 
-    std::cout << "KILL FLUID" << std::endl;
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();

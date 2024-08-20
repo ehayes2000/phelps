@@ -6,6 +6,7 @@ export async function showAnimation(canvasId) {
     console.error("canvas not found!");
     return;
   }
+  document.addEventListener('contextmenu', event => event.preventDefault());
   let modArgs;
   modArgs = await Phelps({ canvas: canvas });
 }
