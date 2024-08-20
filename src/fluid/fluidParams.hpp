@@ -15,7 +15,7 @@ public:
   float gravity = 0.f;
   int renderHeight = 1000;
   int renderWidth = 1710;
-  int nParticles = 8000;
+  int nParticles = 10; 
   int resolutionIterations = 3;
   float forceRadius = .165;
 };

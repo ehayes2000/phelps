@@ -59,40 +59,6 @@ void SdlFluid::handleSdlEvent(const SDL_Event &event)
 void SdlFluid::init()
 {
 
-  // Setup SDL
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
-  {
-    printf("Error: %s\n", SDL_GetError());
-    exit(1);
-  }
-  SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE);
-  this->window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, fluidParams.renderWidth, fluidParams.renderHeight, window_flags);
-
-  if (window == nullptr)
-  {
-    printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
-    exit(1);
-  }
-  this->renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
-  if (renderer == nullptr)
-  {
-    SDL_Log("Error creating SDL_Renderer!");
-    exit(1);
-  }
-
-  ImGui::CreateContext();
-  ImGui::StyleColorsDark();
-
-  ImGuiIO &io = ImGui::GetIO();
-  (void)io;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-
-  // main loop vars :)
-  done = false;
-  fluid.step(.0001);
-  ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
-  ImGui_ImplSDLRenderer2_Init(renderer);
 }
 
 void SdlFluid::startRenderLoop()

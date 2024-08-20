@@ -40,8 +40,19 @@ find_package(SDL2 REQUIRED)
 # find_package(OpenGL REQUIRED)
 
 if(EMSCRIPTEN)
-    set(CMAKE_EXECUTABLE_SUFFIX ".html")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s USE_SDL=2 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1")
+    set(CMAKE_EXECUTABLE_SUFFIX ".mjs")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+    -s USE_ES6_IMPORT_META=0 \
+    -s IMPORTED_MEMORY \
+    -s USE_SDL=2 \
+    -s WASM=1 \
+    -s INITIAL_MEMORY=8388608 \
+    -s MODULARIZE=1 \
+    -s EXPORT_NAME=Phelps \
+    -s EXPORT_ES6 \
+    -s ENVIRONMENT=worker \
+    -s SINGLE_FILE=1 \
+    -s WASM_WORKERS=1")
 endif()
 
 # Link libraries

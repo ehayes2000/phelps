@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>
+    var memory1 = new WebAssembly.Memory({
+      initial: 128, 
+      maximum: 128,
+      shared: false
+    })
+    memory1.id = "mem1"
+    var memory2 = new WebAssembly.Memory({
+      initial: 128, 
+      maximum: 128,
+      shared: false
+    })
+  </script>
+  <script async src="dist/out.js"></script>
+  <style>
+    .ccontainer{ 
+      display: flex;
+      height: 100vh;
+      width: 100vh;
+    }
+    canvas { 
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="ccontainer">
+  <canvas id="canvas"></canvas>
+  <canvas id="canvas2"></canvas>
+  </div>
+</body>
+  <button onclick="Fluid.showAnimation('canvas')">:)</button>
+  <button onclick="Fluid.showAnimation('canvas2')">:)</button>
+</html>

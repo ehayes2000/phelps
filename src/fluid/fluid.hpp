@@ -27,8 +27,8 @@ public:
     grid(boundSize, params.smoothingRadius)
   {
     // randomInit(nParticles);
-    // gridInit(200, params.smoothingRadius / 1.3);
-    fullGridInit();
+    gridInit(50, params.smoothingRadius / 1.3);
+    // fullGridInit();
   }
 
   void setBounds(int h, int w){  
