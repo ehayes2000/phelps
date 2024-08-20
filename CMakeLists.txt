@@ -43,16 +43,14 @@ if(EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".mjs")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
     -s USE_ES6_IMPORT_META=0 \
-    -s IMPORTED_MEMORY \
+    -s ALLOW_MEMORY_GROWTH=1\
     -s USE_SDL=2 \
     -s WASM=1 \
-    -s INITIAL_MEMORY=8388608 \
     -s MODULARIZE=1 \
     -s EXPORT_NAME=Phelps \
     -s EXPORT_ES6 \
-    -s ENVIRONMENT=worker \
-    -s SINGLE_FILE=1 \
-    -s WASM_WORKERS=1")
+    -s ENVIRONMENT=web \
+    -s SINGLE_FILE=1")
 endif()
 
 # Link libraries
