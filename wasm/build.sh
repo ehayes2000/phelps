@@ -3,7 +3,7 @@ mkdir dist build
 cd build 
 emcmake cmake ../..
 emmake make
-cp phelps.mjs ../pkg/phelps/phelpss.js
+mv phelps.mjs phelps.js
 cd ..
 node bundle.js
 cp index.html dist/index.html
