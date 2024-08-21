@@ -1,4 +1,4 @@
-rm -rf dist dist
+rm -rf dist build 
 mkdir dist build
 cd build 
 emcmake cmake ../..

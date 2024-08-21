@@ -1,2 +1,2 @@
-import Phelps from "./phelpss"
+import Phelps from "../build/phelps"
 export default Phelps
