@@ -1,4 +1,0 @@
-[submodule "imgui"]
-	path = include/imgui
-	url = git@github.com:ocornut/imgui.git 
-
