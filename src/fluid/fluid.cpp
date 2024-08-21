@@ -142,13 +142,13 @@ void Fluid::doubleDensityRelaxation()
   // }
 }
 
-void Fluid::pushForce(Vec &p)
+void Fluid::pushForce(Vec &p, float radius)
 {
   for (int i = 0; i < particles.size; ++i){
     Vec offset = particles.positions[i] - p;
     float dist = offset.mag();
     if (dist > 0 && dist < params.forceRadius){
-      float influence = cubicKernel(dist, params.forceRadius) * 1000;
+      float influence = cubicKernel(dist, radius) * 1000;
       Vec forceVec = (offset / dist) * influence;
       particles.velocities[i] += forceVec;
     }
@@ -353,8 +353,8 @@ void Fluid::fullGridInit() {
   int i = 0;
   std::vector<Vec> pos;
   std::vector<Vec> prevPos;
-  for (float xp = .005; xp <= 1; xp += params.smoothingRadius / 1.4){  
-    for (float yp = .01; yp <= boundSize.y - .01 ; yp += params.smoothingRadius / 1.4, ++i) { 
+  for (float xp = .005; xp <= 1; xp += params.smoothingRadius / 1.3){  
+    for (float yp = .01; yp <= boundSize.y - .01 ; yp += params.smoothingRadius / 1.3, ++i) { 
       pos.push_back(Vec(xp, yp));
       prevPos.push_back(Vec(xp, yp));
     }

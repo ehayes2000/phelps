@@ -97,7 +97,9 @@ private:
   void showDebugUi();
   void reset();
   Color plasmaGradient(float value, float minVal, float maxVal) const;
-
   Uint32 nowTicks, prevTicks;
   bool done;
+  void applyAutoClick(float);
+  float click;
+  Vec getAutoClick(float, int, int, int);
 };

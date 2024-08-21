@@ -86,12 +86,15 @@ void SdlFluid::showDebugUi()
   ImGui::SetNextWindowSize(ImVec2(550, 6), ImGuiCond_FirstUseEver);
   ImGuiWindowFlags window_flags = 0;
   bool p_open;
+  ImGui::SetNextWindowSize(ImVec2(400, 400));
   if (!ImGui::Begin("Debug", &p_open, window_flags))
   {
     ImGui::End();
     return;
   }
+  ImGui::Checkbox("Pause (Space)", &params.isPaused);
   ImGui::Checkbox("Adjacent View", &params.isAdjacentView);
+  ImGui::Checkbox("Auto Click", &params.isAutoClick);
   ImGui::Separator();
   const float dragSpeed = .001;
   const float range = 100.f;
@@ -148,6 +151,9 @@ void SdlFluid::stepRenderLoop()
   {
     showDebugUi();
   }
+  if (params.isAutoClick) { 
+    applyAutoClick(deltaSec);
+  }
   if (!params.isPaused)
   {
     fluid.step(deltaSec);
@@ -155,7 +161,7 @@ void SdlFluid::stepRenderLoop()
   if (params.isLClick && !params.isPaused)
   {
     Vec simPoint = fluid.rtos(params.mousePos);
-    fluid.pushForce(simPoint);
+    fluid.pushForce(simPoint, .165);
   }
   else if (params.isRClick && !params.isPaused)
   {
@@ -275,3 +281,25 @@ void SdlFluid::reset() {
   new (&this->fluidParams) FluidParameters();
   new (&this->fluid) Fluid(fluidParams);
 }
+
+Vec SdlFluid::getAutoClick(float deltaTime, int radius, int width, int height){
+  click += deltaTime / 2.f;
+  float x = (std::cos(click) / 2.f) + 1.f;
+  float y = (std::sin(click) / 2.f) + 1.f;
+  x *= 2 * radius;
+  y *= 2 * radius;
+  float offsetX = (width / 2)-2*radius;
+  float offsetY = (height / 2)-2*radius;
+  x = static_cast<int>(x + offsetX);
+  y = static_cast<int>(y + offsetY);
+  return fluid.rtos(Vec(x, y));
+}
+void SdlFluid::applyAutoClick(float deltaTime) {
+  Vec click = getAutoClick(
+    deltaTime, 
+    300, 
+    fluidParams.renderWidth,
+    fluidParams.renderHeight
+  );
+  fluid.pushForce(click, 1.f/7.f);
+} 

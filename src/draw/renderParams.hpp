@@ -9,6 +9,7 @@ struct RenderParameters {
   bool isLClick = false;
   bool isRClick = false;
   bool isReset = false;
+  bool isAutoClick = true;
   int guiScale = 1;
   Vec mousePos;
 };

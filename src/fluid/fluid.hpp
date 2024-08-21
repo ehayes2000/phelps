@@ -38,7 +38,7 @@ public:
   }
 
   void step(float deltaSec);
-  void pushForce(Vec &p);
+  void pushForce(Vec &p, float radius);
   void pullForce(Vec &p);
   void resize(int width, int height);
   void regrid() {  
