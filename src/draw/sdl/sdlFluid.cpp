@@ -277,7 +277,11 @@ Color SdlFluid::plasmaGradient(float value, float minValue, float maxValue) cons
 }
 
 void SdlFluid::reset() { 
+  int h = fluidParams.renderHeight;
+  int w = fluidParams.renderWidth;
   new (&this->fluidParams) FluidParameters();
+  fluidParams.renderHeight = h;
+  fluidParams.renderWidth = w;
   new (&this->fluid) Fluid(fluidParams);
 }
 
