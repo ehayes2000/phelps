@@ -104,7 +104,6 @@ void SdlFluid::showDebugUi()
   ImGui::DragFloat("Smoothing Radius", &fluidParams.smoothingRadius, dragSpeed, -range, range);
   ImGui::DragFloat("Target Density", &fluidParams.targetDensity, dragSpeed, -range, range);
   ImGui::DragFloat("Pressure", &fluidParams.pressureMultiplier, dragSpeed, -range, range);
-  ImGui::DragFloat("Near Pressure", &fluidParams.nearPressureMultiplier, dragSpeed, -range, range);
   ImGui::DragFloat("Viscosity Beta", &fluidParams.viscosityBeta, dragSpeed, -range, range);
   ImGui::DragFloat("Viscosity Delta", &fluidParams.viscosityDelta, dragSpeed, -range, range);
   if (smoothingRadius != fluidParams.smoothingRadius){

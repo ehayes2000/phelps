@@ -210,30 +210,6 @@ void Fluid::randomInit(int n)
   }
 }
 
-// void Fluid::gridInit(int cols, float gap)
-// {
-
-//   float xSpace = (cols - 1) * gap;
-//   int n = particles.size;
-//   int nRows = std::ceil(static_cast<float>(n) / static_cast<float>(cols));
-//   float ySpace = (nRows - 1) * gap;
-//   const float xStart = (boundSize.x / 2) - (xSpace / 2);
-//   float x = xStart;
-//   float y = (boundSize.y / 2) + (ySpace / 2);
-//   int created = 0;
-//   for (int r = 0; r < nRows && created < n; r++, y -= gap)
-//   {
-//     for (int c = 0; c < cols && created < n; c++, x += gap, created++)
-//     {
-//       particles.positions[created] = Vec(x, y);
-//       particles.prevPositions[created] = Vec(x, y);
-//       particles.velocities[created] = Vec(0, 0);
-//     }
-//     x = xStart;
-//   }
-// }
-
-
 void Fluid::gridInit(int cols, float gap)
 {
     int n = particles.size;
@@ -273,43 +249,11 @@ void Fluid::applyViscosity(float deltaTime)
       if (u > 0)
       {
         Vec impulse = deltaTime * (1 - q) * (params.viscosityDelta * u + params.viscosityBeta * std::pow(u, 2)) * rij / rij.mag();
-        particles.velocities[i] -= impulse;
+        particles.velocities[i] -= impulse; 
         particles.velocities[j] += impulse;
       }
     }
   }
-}
-
-void Fluid::computeDensityGrid(std::vector<std::vector<float>> &grid) const
-{
-  grid[0][0] = 0;
-  // // expect zeroed vector of size renderWidth, renderWidth
-  // const int pxRadius = params.smoothingRadius * scale;
-  // for (const auto &p : particles)
-  // {
-  //   Vec px = stor(p.position);
-  //   for (int row = px.y - pxRadius; row <= px.y + pxRadius; row++)
-  //   {
-  //     for (int col = px.x - pxRadius; col <= px.x + pxRadius; col++)
-  //     {
-  //       if (row < 0 || row >= params.renderHeight || col < 0 || col >= params.renderWidth)
-  //       {
-  //         continue;
-  //       }
-  //       Vec rp = rtos(Vec(col, row));
-  //       float dist = (rp - p.position).mag();
-  //       grid[row][col] += smoothingKernel(dist);
-  //     }
-  //   }
-  // }
-  // for (auto &row : grid)
-  // {
-  //   for (int i = 0; i < row.size(); ++i)
-  //   {
-  //     row[i] -= params.targetDensity;
-  //   }
-  // }
-  // normalizeDensityGrid(grid);
 }
 
 void Fluid::normalizeDensityGrid(std::vector<std::vector<float>> &grid) const
