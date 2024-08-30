@@ -1,5 +1,7 @@
 #include "fluid.hpp"
 #include <ranges>
+#include <algorithm>
+#include <ctime>
 
 void Fluid::step(float deltaSec)
 {

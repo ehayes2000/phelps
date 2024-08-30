@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <unordered_map>
 
 class Grid { 
 public:

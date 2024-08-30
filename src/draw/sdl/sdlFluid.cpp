@@ -1,5 +1,6 @@
 #include "sdlFluid.hpp"
 #include "circle.h"
+#include <algorithm>
 
 void SdlFluid::drawParticles(const float deltaTime)
 {
